@@ -5,7 +5,7 @@ class UserManager(BaseUserManager):
     """Custom user manager."""
 
     def _create_base_user(self, first_name, surname, username,
-                          email, password, **exstra_fields):
+                          email, password, **extra_fields):
 
         if not first_name:
             raise ValueError("User must have first name")
@@ -25,7 +25,7 @@ class UserManager(BaseUserManager):
                               username=username,
                               email=email,
                               password=None,
-                              **exstra_fields)
+                              **extra_fields)
         except TypeError:
             raise TypeError("Unexisting field of model")
 
@@ -36,17 +36,19 @@ class UserManager(BaseUserManager):
         
 
     def create_user(self, first_name, surname, username,
-                    email, password, **exstra_fields):
-        exstra_fields["is_superuser"] = False
-        exstra_fields["is_staff"] = False
-        exstra_fields["is_activated"] = False
+                    email, password, **extra_fields):
+
+        extra_fields["is_superuser"] = False
+        extra_fields["is_staff"] = False
+        extra_fields["is_activated"] = False
         return self._create_base_user(first_name, surname, username,
-                                      email, password, **exstra_fields)
+                                      email, password, **extra_fields)
 
     def create_superuser(self, first_name, surname, username,
-                    email, password, **exstra_fields):
-        exstra_fields["is_superuser"] = True
-        exstra_fields["is_staff"] = True
-        exstra_fields["is_activated"] = True
+                         email, password, **extra_fields):
+
+        extra_fields["is_superuser"] = True
+        extra_fields["is_staff"] = True
+        extra_fields["is_activated"] = True
         return self._create_base_user(first_name, surname, username,
-                                      email, password, **exstra_fields)
+                                      email, password, **extra_fields)

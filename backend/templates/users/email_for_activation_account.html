@@ -1,0 +1,7 @@
+{% block content %}
+
+Hi, {{ user.username }} click on link for activate your account.
+
+http://{{ domain }}{% url 'users:activation_account' id token %}
+
+{% endblock content %}
