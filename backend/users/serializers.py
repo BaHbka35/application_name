@@ -43,3 +43,17 @@ class SignUpSerializer(serializers.Serializer):
                 raise serializers\
                     .ValidationError("Surname must contain only latters.")
         return surname
+
+
+class LogInSerializer(serializers.Serializer):
+
+    username = serializers.CharField()
+    password = serializers.CharField()
+
+
+class UsersListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        field = ('first_name', 'surname', 'username')
+

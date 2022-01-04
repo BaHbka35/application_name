@@ -1,9 +1,13 @@
+from django.contrib.auth import authenticate
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
+from rest_framework.permissions import IsAuthenticated
 
-from .serializers import SignUpSerializer
+from .serializers import SignUpSerializer, LogInSerializer,\
+                         UsersListSerializer
 from .models import User
 from .services import TokenService, EmailService,\
                       create_user_and_send_email_for_activation
@@ -36,6 +40,7 @@ class AccountActivationView(APIView):
     """View for activate user account"""
 
     def get(self, request, id, token):
+
         """Activate user and return token for authontication."""
         try:
             user = User.objects.get(id=id)
@@ -45,10 +50,38 @@ class AccountActivationView(APIView):
         if TokenService.check_activation_token(token, user):
             user.is_activated = True
             user.save()
-            token = Token.objects.create(user=user)
-            json = {
-                "token": token.key,
+            data = {
                 "message": "account was activated",
             }
-            return Response(data=json, status=status.HTTP_200_OK)
+            return Response(data=data, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class LogInView(APIView):
+
+    def post(self, request):
+        serializer = LogInSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.data["username"]
+            password = serializer.data["password"]
+            user = authenticate(username=username, password=password)
+
+            if not user:
+                data={"message": "Username or password uncorrect."}
+                return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+            token = Token.objects.get_or_create(user=user)[0].key
+            data = serializer.data
+            data["token"] = token
+            return Response(data=data, status=status.HTTP_200_OK)
+
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class UsersListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = UsersListSerializer(data=request.data, many=True)
+        if serializer.is_valid():
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)
