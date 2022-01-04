@@ -18,13 +18,13 @@ class SignUpSerializer(serializers.Serializer):
         max_length=50, validators=[UniqueValidator(
         queryset=User.objects.all())]
         )
-    password = serializers.CharField(min_length=8, write_only=True)
+    password = serializers.CharField(min_length=8)
     password2 = serializers.CharField(min_length=8, write_only=True)
 
     def validate(self, data):
-        """Chack that first password equal second"""
+        """Check that first password equal second"""
         if data["password"] == data["password2"]:
-            del data["password2"]
+            # del data["password2"]
             return data
         raise serializers.ValidationError("Passwords doesn't match")
 
@@ -43,7 +43,3 @@ class SignUpSerializer(serializers.Serializer):
                 raise serializers\
                     .ValidationError("Surname must contain only latters.")
         return surname
-
-    def create(self, data):
-        """ Creates and returns user"""
-        return User.objects.create_user(**data)

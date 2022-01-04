@@ -5,7 +5,8 @@ from rest_framework.authtoken.models import Token
 
 from .serializers import SignUpSerializer
 from .models import User
-from .services import get_activation_token, send_email_for_activate_account
+from .services import TokenService, EmailService,\
+                      create_user_and_send_email_for_activation
 
 
 class SignUpView(APIView):
@@ -18,10 +19,11 @@ class SignUpView(APIView):
         """
         serializer = SignUpSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.save()
-            send_email_for_activate_account(request, user)
+            create_user_and_send_email_for_activation(
+                request, **serializer.data)
             json = serializer.data
             json["message"] = "Check your email for activate account."
+            del json['password']
             return Response(data=json,
                             status=status.HTTP_201_CREATED)
         return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -38,9 +40,9 @@ class AccountActivationView(APIView):
         try:
             user = User.objects.get(id=id)
         except:
-            json = {"message": "User with given id not found"}
+            json = {"message": "Activation account is faild."}
             return Response(data=json, status=status.HTTP_400_BAD_REQUEST)
-        if token == get_activation_token(user):
+        if TokenService.check_activation_token(token, user):
             user.is_activated = True
             user.save()
             token = Token.objects.create(user=user)

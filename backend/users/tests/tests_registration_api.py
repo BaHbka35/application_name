@@ -4,7 +4,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from users.models import User
-from users.services import get_activation_token
+from users.services import TokenService
 
 
 
@@ -30,6 +30,7 @@ class RegistrationAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(User.objects.get().username, 'Luk')
         self.assertEqual(User.objects.count(), 1)
+        self.assertEqual('password' in response.data, False)
 
     def test_create_account_with_defferent_passwords(self):
         """Tests creating user with defferent passwords"""
@@ -129,7 +130,7 @@ class AccountActivationAPITests(APITestCase):
     def test_activate_account(self):
         """Tests account activation with true activation_token"""
         user = User.objects.get()
-        activation_token = get_activation_token(user)
+        activation_token = TokenService.get_activation_token(user)
         url = reverse('users:activate_account',
                       kwargs={"id": user.id, "token": activation_token})
         response = self.client.get(url)
@@ -151,7 +152,7 @@ class AccountActivationAPITests(APITestCase):
     def test_activate_account_with_wrong_id(self):
         """Tests account activation with wrong given user id."""
         user = User.objects.get()
-        activation_token = get_activation_token(user)
+        activation_token = TokenService.get_activation_token(user)
         url = reverse('users:activate_account',
                       kwargs={"id": 333, "token": activation_token})
         response = self.client.get(url)
