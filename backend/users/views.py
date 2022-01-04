@@ -34,16 +34,19 @@ class AccountActivationView(APIView):
     """View for activate user account"""
 
     def get(self, request, id, token):
-        print(id)
-        print(token)
-        user = User.objects.get(id=id)
+        """Activate user and return token for authontication."""
+        try:
+            user = User.objects.get(id=id)
+        except:
+            json = {"message": "User with given id not found"}
+            return Response(data=json, status=status.HTTP_400_BAD_REQUEST)
         if token == get_activation_token(user):
             user.is_activated = True
+            user.save()
             token = Token.objects.create(user=user)
             json = {
                 "token": token.key,
                 "message": "account was activated",
             }
-            user.save()
             return Response(data=json, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)

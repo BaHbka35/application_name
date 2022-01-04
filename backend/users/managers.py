@@ -33,7 +33,6 @@ class UserManager(BaseUserManager):
         user.slug = username
         user.save()
         return user
-        
 
     def create_user(self, first_name, surname, username,
                     email, password, **extra_fields):
