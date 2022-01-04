@@ -55,5 +55,5 @@ class UsersListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        field = ('first_name', 'surname', 'username')
+        fields = ('first_name', 'surname', 'username')
 

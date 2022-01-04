@@ -81,7 +81,8 @@ class UsersListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        serializer = UsersListSerializer(data=request.data, many=True)
-        if serializer.is_valid():
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+        queryset = User.objects.all()
+        serializer = UsersListSerializer(queryset, many=True)
+        # if serializer.is_valid():
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+        # return Response(status=status.HTTP_400_BAD_REQUEST)
