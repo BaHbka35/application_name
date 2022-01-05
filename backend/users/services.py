@@ -64,5 +64,9 @@ class EmailService:
 
 
 def create_user_and_send_email_for_activation(request, **data):
+    """
+    Creates user and send him email with
+    contain link for account activation
+    """
     user = User.objects.create_user(**data)
     EmailService.send_email_for_activate_account(request, user)
