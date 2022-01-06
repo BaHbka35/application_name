@@ -1,11 +1,13 @@
+from __future__ import annotations
 from django.contrib.auth.base_user import BaseUserManager
 
 
 class UserManager(BaseUserManager):
     """Custom user manager."""
 
-    def _create_base_user(self, first_name, surname, username,
-                          email, password, **extra_fields):
+    def _create_base_user(self, first_name: str, surname: str,
+                          username: str, email: str, password: str,
+                          **extra_fields: dict) -> User:
 
         if not first_name:
             raise ValueError("User must have first name")
@@ -34,8 +36,9 @@ class UserManager(BaseUserManager):
         user.save()
         return user
 
-    def create_user(self, first_name, surname, username,
-                    email, password, **extra_fields):
+    def create_user(self, first_name: str, surname: str,
+                    username: str, email: str, password: str,
+                    **extra_fields: dict) -> User:
 
         extra_fields["is_superuser"] = False
         extra_fields["is_staff"] = False
@@ -43,8 +46,9 @@ class UserManager(BaseUserManager):
         return self._create_base_user(first_name, surname, username,
                                       email, password, **extra_fields)
 
-    def create_superuser(self, first_name, surname, username,
-                         email, password, **extra_fields):
+    def create_superuser(self, first_name: str, surname: str,
+                         username: str, email: str, password: str,
+                         **extra_fields: dict) -> User:
 
         extra_fields["is_superuser"] = True
         extra_fields["is_staff"] = True

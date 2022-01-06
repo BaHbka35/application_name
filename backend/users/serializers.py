@@ -21,13 +21,13 @@ class SignUpSerializer(serializers.Serializer):
     password = serializers.CharField(min_length=8)
     password2 = serializers.CharField(min_length=8, write_only=True)
 
-    def validate(self, data):
+    def validate(self, data: dict) -> dict:
         """Check that first password equal second"""
         if data["password"] == data["password2"]:
             return data
         raise serializers.ValidationError("Passwords doesn't match")
 
-    def validate_first_name(self, first_name):
+    def validate_first_name(self, first_name: str) -> str:
         """Check that name doesn't contain 'bad' symbols"""
         s = "1234567890.?/,!@#$%^&*()_-+={}[]\|\\;:\"'<>"
         for letter in first_name.lower():
@@ -36,7 +36,7 @@ class SignUpSerializer(serializers.Serializer):
                     .ValidationError("Name must contain only latters.")
         return first_name
 
-    def validate_surname(self, surname):
+    def validate_surname(self, surname: str) -> str:
         """Check that surname doesn't contain 'bad' symbols"""
         s = "1234567890.?/,!@#$%^&*()_-+={}[]\|\\;:\"'<>"
         for letter in surname.lower():
@@ -65,7 +65,7 @@ class ChangePasswordSerializer(serializers.Serializer):
     new_password = serializers.CharField(min_length=8)
     new_password2 = serializers.CharField(min_length=8, write_only=True)
 
-    def validate(self, data):
+    def validate(self, data: dict) -> dict:
         """Check that first password equal second"""
         if data["new_password"] == data["new_password2"]:
             return data

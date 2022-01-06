@@ -49,7 +49,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         default=False, verbose_name="Is user a superuser?")
 
     is_active = models.BooleanField(default=True,
-        verbose_name="Is user active of his account was deleted?")
+        verbose_name="Is user active or his account was deleted?")
 
     is_activated = models.BooleanField(
         default=False, verbose_name="Has user activated accoung?")

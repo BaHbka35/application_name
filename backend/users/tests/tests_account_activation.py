@@ -31,8 +31,8 @@ class AccountActivationAPITests(APITestCase):
         url = reverse('users:activate_account',
                       kwargs={"id": user.id, "token": activation_token})
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
         user = User.objects.get()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(user.is_activated, True)
 
     def test_activate_account_with_wrong_token(self):
