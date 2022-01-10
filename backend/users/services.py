@@ -21,7 +21,7 @@ class TokenService:
         """
         forming_str = f"{user.id}{user.username}"
         forming_str = forming_str.encode()
-        hash_object = hashlib.md5(forming_str + settings.SECRET_KEY_BYTES)
+        hash_object = hashlib.sha256(forming_str + settings.SECRET_KEY_BYTES)
         return hash_object.hexdigest()
 
     @classmethod
