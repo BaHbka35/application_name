@@ -23,7 +23,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         max_length=30, verbose_name="username", unique=True)
 
     slug = models.SlugField(
-        verbose_name="field intends for useing in url", unique=True)
+        verbose_name="field intends for useing in url (slug)", unique=True)
 
     email = models.EmailField(
         max_length=50, verbose_name="user email", unique=True)
@@ -41,6 +41,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     trains_now = models.BooleanField(
         verbose_name="Does user train now", blank=True, null=True)
+
+    registration_date = models.DateTimeField(
+        auto_now_add=True, verbose_name="Date when user was registrated")
 
     is_staff = models.BooleanField(
         default=False, verbose_name="Is user a member of staff?")
