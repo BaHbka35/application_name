@@ -49,7 +49,7 @@ class ChangePasswordTests(APITestCase):
 
         auth_header = 'Token ' + user_auth_token
         self.client.credentials(HTTP_AUTHORIZATION=auth_header)
-        response = self.client.post(self.url, data=self.data,
+        response = self.client.put(self.url, data=self.data,
                                     format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.__check_that_password_was_changed_successfuly()
@@ -95,7 +95,7 @@ class ChangePasswordTests(APITestCase):
 
         auth_header = 'Token ' + user_auth_token
         self.client.credentials(HTTP_AUTHORIZATION=auth_header)
-        response = self.client.post(self.url, data=data,
+        response = self.client.put(self.url, data=data,
                                     format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -121,9 +121,9 @@ class ChangePasswordTests(APITestCase):
         auth_header = 'Token ' + user_auth_token
         self.client.credentials(HTTP_AUTHORIZATION=auth_header)
 
-        response = self.client.post(self.url, data=data,
+        response = self.client.put(self.url, data=data,
                                     format='json')
-        response2 = self.client.post(self.url, data=data2,
+        response2 = self.client.put(self.url, data=data2,
                                     format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response2.status_code, status.HTTP_400_BAD_REQUEST)

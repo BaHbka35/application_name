@@ -1,7 +1,27 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
-from .models import User
+from .models import User, GENDER
+
+
+def validate_first_name(first_name: str) -> str:
+    """Check that name doesn't contain 'bad' symbols"""
+    s = "1234567890.?/,!@#$%^&*()_-+={}[]\|\\;:\"'<>"
+    for letter in first_name.lower():
+        if letter in s:
+            raise serializers\
+                .ValidationError("Name must contain only latters.")
+    return first_name
+
+
+def validate_surname(surname: str) -> str:
+    """Check that surname doesn't contain 'bad' symbols"""
+    s = "1234567890.?/,!@#$%^&*()_-+={}[]\|\\;:\"'<>"
+    for letter in surname.lower():
+        if letter in s:
+            raise serializers\
+                .ValidationError("Surname must contain only latters.")
+    return surname
 
 
 class SignUpSerializer(serializers.Serializer):
@@ -29,22 +49,11 @@ class SignUpSerializer(serializers.Serializer):
 
     def validate_first_name(self, first_name: str) -> str:
         """Check that name doesn't contain 'bad' symbols"""
-        s = "1234567890.?/,!@#$%^&*()_-+={}[]\|\\;:\"'<>"
-        for letter in first_name.lower():
-            if letter in s:
-                raise serializers\
-                    .ValidationError("Name must contain only latters.")
-        return first_name
+        return validate_first_name(first_name)
 
     def validate_surname(self, surname: str) -> str:
         """Check that surname doesn't contain 'bad' symbols"""
-        s = "1234567890.?/,!@#$%^&*()_-+={}[]\|\\;:\"'<>"
-        for letter in surname.lower():
-            if letter in s:
-                raise serializers\
-                    .ValidationError("Surname must contain only latters.")
-        return surname
-
+        return validate_surname(surname)
 
 class LogInSerializer(serializers.Serializer):
     """Serializer for login users."""
@@ -70,3 +79,33 @@ class ChangePasswordSerializer(serializers.Serializer):
         if data["new_password"] == data["new_password2"]:
             return data
         raise serializers.ValidationError("Passwords doesn't match")
+
+
+class UpdateUserDateSerializer(serializers.Serializer):
+    """Serializer for updating user data."""
+    first_name = serializers.CharField(max_length=30, required=True)
+    surname = serializers.CharField(max_length=30, required=True)
+    username = serializers.CharField(
+        max_length=30, validators=[UniqueValidator(
+        queryset=User.objects.all())], required=True
+        )
+    age = serializers.IntegerField(min_value=1, required=True)
+    gender = serializers.ChoiceField(choices=GENDER, required=True)
+    training_experience = serializers.DecimalField(
+        min_value=0, max_digits=3, decimal_places=1, required=True)
+    trains_now = serializers.BooleanField(required=True)
+
+    def validate_first_name(self, first_name: str) -> str:
+        """Check that name doesn't contain 'bad' symbols"""
+        return validate_first_name(first_name)
+
+    def validate_surname(self, surname: str) -> str:
+        """Check that surname doesn't contain 'bad' symbols"""
+        return validate_surname(surname)
+
+    def validate_training_experience(self, training_experience: str) -> str:
+        """Check that training_experience is positive or null"""
+        if training_experience >= 0:
+            return training_experience
+        raise serializers.ValidationError(
+            "Training experience must be positive of null")
