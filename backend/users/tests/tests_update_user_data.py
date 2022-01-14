@@ -47,8 +47,9 @@ class UpdateUserDataTests(APITestCase):
 
     def test_update_user_date_without_login(self):
         """Tests update user date without login."""
-        response = self.client.put(self.url, data=self.updating_data, format='json')
-        self.assertEqual(True, True)
+        response = self.client.put(self.url, data=self.updating_data,
+                                   format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
     def test_update_user_data_with_right_data(self):
@@ -59,7 +60,8 @@ class UpdateUserDataTests(APITestCase):
 
         auth_header = 'Token ' + user_auth_token
         self.client.credentials(HTTP_AUTHORIZATION=auth_header)
-        response = self.client.put(self.url, data=self.updating_data, format='json')
+        response = self.client.put(self.url, data=self.updating_data,
+                                   format='json')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.__check_response_data(response)
@@ -118,7 +120,10 @@ class UpdateUserDataTests(APITestCase):
         self.assertEqual(user.age, None)
 
     def test_update_data_with_uncorrect_first_name(self):
-        """Tests update user data with first_name than contans 'bad' symbols."""
+        """
+        Tests update user data with first_name
+        that contains 'bad' symbols.
+        """
         user = User.objects.get()
         response = login_user(self, login_data)
         user_auth_token = response.data['token']
@@ -134,7 +139,7 @@ class UpdateUserDataTests(APITestCase):
         self.assertEqual(user.first_name, 'Sasha')
 
     def test_update_data_with_uncorrect_surname(self):
-        """Tests update user data with surname than contans 'bad' symbols."""
+        """Tests update user data with surname than contains 'bad' symbols."""
         user = User.objects.get()
         response = login_user(self, login_data)
         user_auth_token = response.data['token']
