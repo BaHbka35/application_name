@@ -91,10 +91,26 @@ class UserService:
 
     @staticmethod
     def activate_user(user: User) -> None:
+        """Activates user account"""
         user.is_activated = True
         user.save()
 
     @staticmethod
     def change_user_password(user: User, password: str) -> None:
+        """Changes user password"""
         user.set_password(password)
         user.save()
+
+    @staticmethod
+    def update_user_data(user: User, data: dict) -> None:
+        """Update user data."""
+        user.first_name = data['first_name']
+        user.surname = data['surname']
+        user.username = data['username']
+        user.slug = user.username
+        user.age = data['age']
+        user.gender = data['gender']
+        user.training_experience = data['training_experience']
+        user.trains_now = data['trains_now']
+        user.save()
+

@@ -9,7 +9,8 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
 from .serializers import SignUpSerializer, LogInSerializer, \
-                         UsersListSerializer, ChangePasswordSerializer
+                         UsersListSerializer, ChangePasswordSerializer, \
+                         UpdateUserDateSerializer
 from .models import User
 from .services import TokenService, UserService
 
@@ -130,12 +131,44 @@ class ChangePasswordView(APIView):
 
     permission_classes = [IsAuthenticated]
 
-    def post(self, request) -> Response:
+    def put(self, request) -> Response:
         """Change user password and delete his authentication token."""
         serializer = ChangePasswordSerializer(data=request.data)
         if serializer.is_valid():
             user = request.user
-            UserService.change_user_password(user, serializer.data["new_password"])
+            UserService.change_user_password(
+                user, serializer.data["new_password"])
             TokenService.delete_user_auth_token(user)
             return Response(status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class DeleteUserAccountView(APIView):
+    """View for deleteing user account."""
+
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request) -> Response:
+        """Delete user account"""
+        user = request.user
+        TokenService.delete_user_auth_token(user)
+        user.delete()
+        return Response(status=status.HTTP_200_OK)
+
+
+class UpdateUserDateView(APIView):
+    """View for updating user data"""
+
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        """Update user data"""
+        serializer = UpdateUserDateSerializer(data=request.data)
+        if serializer.is_valid():
+            user = request.user
+            UserService.update_user_data(user, serializer.data)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        message = 'data is not valid'
+        return Response(data={'message': message},
+                        status=status.HTTP_400_BAD_REQUEST)
+

@@ -4,14 +4,13 @@ from django.contrib.auth.base_user import AbstractBaseUser
 
 from .managers import UserManager
 
+GENDER = (
+    ('male', 'male'),
+    ('female', 'female'),
+)
 
 class User(AbstractBaseUser, PermissionsMixin):
     """Cutom user model."""
-
-    GENDER = (
-        ('male', 'male'),
-        ('female', 'female'),
-    )
 
     first_name = models.CharField(
         max_length=30, verbose_name="first name")
