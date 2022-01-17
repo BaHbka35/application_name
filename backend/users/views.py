@@ -24,18 +24,14 @@ class SignUpView(APIView):
         Return response about success registration or about fail
         """
         serializer = SignUpSerializer(data=request.data)
-        if serializer.is_valid():
-            UserService.create_user_and_send_email_for_activation(
-                request, **serializer.data)
-            json = serializer.data
-            json["message"] = "Check your email for activate account."
-            del json['password']
-            return Response(data=json,
-                            status=status.HTTP_201_CREATED)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-
-    def get(self, request) -> Response:
-        return Response(status=status.HTTP_200_OK)
+        serializer.is_valid(raise_exception=True)
+        UserService.create_user_and_send_email_for_activation(
+            request, **serializer.data)
+        json = serializer.data
+        json["message"] = "Check your email for activate account."
+        del json['password']
+        return Response(data=json,
+                        status=status.HTTP_201_CREATED)
 
 
 class AccountActivationView(APIView):
@@ -82,9 +78,7 @@ class LogInView(APIView):
 
             if user.is_activated:
                 token = TokenService.get_user_auth_token(user)
-                data = serializer.data
-                data["token"] = token
-                return Response(data=data,
+                return Response(data={'token': token},
                                 status=status.HTTP_200_OK)
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -95,23 +89,6 @@ class LogInView(APIView):
         password = data["password"]
         user = authenticate(username=username, password=password)
         return user
-
-
-class UsersListView(APIView):
-    """View for getting users list."""
-
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request) -> Response:
-        """Returns list of users."""
-        users_list = self.__get_users_list()
-        return Response(data=users_list, status=status.HTTP_200_OK)
-
-    def __get_users_list(self) -> list:
-        """Create queryset than serialize it and return users list."""
-        queryset = User.objects.all()
-        serializer = UsersListSerializer(queryset, many=True)
-        return json.loads(json.dumps(serializer.data))
 
 
 class LogOutView(APIView):
@@ -156,7 +133,7 @@ class DeleteUserAccountView(APIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class UpdateUserDateView(APIView):
+class UpdateUserDataView(APIView):
     """View for updating user data"""
 
     permission_classes = [IsAuthenticated]
@@ -172,3 +149,19 @@ class UpdateUserDateView(APIView):
         return Response(data={'message': message},
                         status=status.HTTP_400_BAD_REQUEST)
 
+
+class UsersListView(APIView):
+    """View for getting users list."""
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request) -> Response:
+        """Returns list of users."""
+        users_list = self.__get_users_list()
+        return Response(data=users_list, status=status.HTTP_200_OK)
+
+    def __get_users_list(self) -> list:
+        """Create queryset than serialize it and return users list."""
+        queryset = User.objects.all()
+        serializer = UsersListSerializer(queryset, many=True)
+        return json.loads(json.dumps(serializer.data))

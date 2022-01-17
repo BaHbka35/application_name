@@ -25,7 +25,7 @@ login_data = {
 class ChangePasswordTests(APITestCase):
     """Class for testing changing password."""
 
-    url = reverse('users:change_password')
+    url = reverse('users:change_user_password')
     data = {
         "old_password": "123456789",
         "new_password": "1234567890",

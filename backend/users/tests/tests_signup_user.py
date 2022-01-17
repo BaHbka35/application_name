@@ -36,7 +36,7 @@ class RegistrationAPITests(APITestCase):
         self.assertEqual(User.objects.count(), 0)
 
     def test_create_account_wiht_short_password(self):
-        """Tests criating user with short password."""
+        """Tests creating user with short password."""
         data = self.data.copy()
         data['password1'] = 'short'
         data['password2'] = 'short'
@@ -45,7 +45,7 @@ class RegistrationAPITests(APITestCase):
         self.assertEqual(User.objects.count(), 0)
 
     def test_create_account_with_not_suitable_name(self):
-        """Tests creating user with not suitabel chars in first_name."""
+        """Tests creating user with not suitable chars in first_name."""
         data = self.data.copy()
         data["first_name"] = "234a34"
         response = self.client.post(self.url, data, format='json')
@@ -61,7 +61,7 @@ class RegistrationAPITests(APITestCase):
         self.assertEqual(User.objects.count(), 0)
 
     def test_create_account_with_not_suitable_surname(self):
-        """Tests creating user with not suitabel chars in surname."""
+        """Tests creating user with not suitable chars in surname."""
         data = self.data.copy()
         data["surname"] = "234a34"
         response = self.client.post(self.url, data, format='json')
@@ -111,3 +111,12 @@ class RegistrationAPITests(APITestCase):
         response = self.client.post(self.url, data2, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(User.objects.count(), 1)
+
+    def test_create_users_without_some_field(self):
+        """Tests creating user without some field."""
+        data = self.data.copy()
+        del data['first_name']
+        response = self.client.post(self.url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(User.objects.count(), 0)
