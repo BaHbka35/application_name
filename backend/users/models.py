@@ -66,3 +66,16 @@ class User(AbstractBaseUser, PermissionsMixin):
         ordering = ("username",)
         verbose_name_plural = "Users"
         verbose_name = "User"
+
+
+class NotConfirmedEmail(models.Model):
+    """
+    This model is needed for temporary store email addresses
+    that users want to set instead old email addresses.
+    Stores only not comfirmed emails. If email
+    is comfermed it must be deleted from here
+    """
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
+    email = models.EmailField(
+        max_length=50, verbose_name="email that user not confirmed")

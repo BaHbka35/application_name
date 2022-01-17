@@ -109,3 +109,16 @@ class UpdateUserDateSerializer(serializers.Serializer):
             return training_experience
         raise serializers.ValidationError(
             "Training experience must be positive of null")
+
+
+class ChangeUserEmailSerializer(serializers.Serializer):
+    """Serializer for changing user email."""
+    new_user_email = serializers.EmailField(required=True, max_length=50)
+
+    def validate_new_user_email(self, new_user_email: str) -> str:
+        try:
+            user = User.objects.get(email=new_user_email)
+        except User.DoesNotExist:
+            return new_user_email
+        raise serializers.ValidationError(
+            'This email is already using')

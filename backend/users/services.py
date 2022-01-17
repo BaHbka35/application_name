@@ -40,6 +40,24 @@ class TokenService:
         token = Token.objects.get(user=user)
         token.delete()
 
+    @classmethod
+    def get_email_confirmation_token(cls, user: User,
+                                     new_user_email: str) -> str:
+        """
+        Create token which will be send on new user emal
+        for confirm changing email.
+        """
+        forming_str = f"{user.id}{user.username}{new_user_email}"
+        forming_str = forming_str.encode()
+        hash_object = hashlib.sha256(forming_str + settings.SECRET_KEY_BYTES)
+        return hash_object.hexdigest()
+
+    @classmethod
+    def check_email_confirmation_token(cls, token: str, user: User,
+                                       new_user_email: str) -> bool:
+        """Check is givven token bolongs to user who is changing email"""
+        return token == cls.get_email_confirmation_token(user, new_user_email)
+
 
 class EmailService:
     """Class witch contain logic for email sending."""
@@ -76,33 +94,72 @@ class EmailService:
         return email
 
 
+    @classmethod
+    def send_email_for_confirm_changing_email(
+            cls, request, user: User, new_user_email: str) -> None:
+        content = cls.__get_content_for_confirm_changing_email(
+                    request, user, new_user_email)
+        ready_email = cls.__get_ready_email_for_confirm_changing(
+                        content, user, new_user_email)
+        ready_email.send()
+
+    def __get_content_for_confirm_changing_email(
+            request, user: User, new_user_email: str) -> dict:
+        """
+        Forms conten for latter which will be
+        sent to new user email for new email confirmation.
+        """
+        token = TokenService.get_email_confirmation_token(user, new_user_email)
+        current_site = get_current_site(request)
+        content = {
+            'user': user,
+            'id': user.id,
+            'token': token,
+            'domain': current_site.domain
+        }
+        return content
+
+    def __get_ready_email_for_confirm_changing(
+            content, user: User, new_user_email: str) -> EmailMessage:
+        """Create email wich is ready to be sent to new user email."""
+        subject = 'Email confirmation'
+        html_message = render_to_string(
+            'users/email_for_email_confirmation.html', content)
+        user_email = new_user_email
+        email = EmailMessage(subject, html_message, to=[user_email])
+        return email
+
+
 class UserService:
     """Class witch contain all logic belongs to user"""
 
     @staticmethod
     def create_user_and_send_email_for_activation(request,
-                                                  **data: dict) -> None:
+                                                  **data: dict) -> User:
         """
         Creates user and send him email with
-        contain link for account activation
+        link for account activation
         """
         user = User.objects.create_user(**data)
         EmailService.send_email_for_activate_account(request, user)
+        return user
 
     @staticmethod
-    def activate_user(user: User) -> None:
+    def activate_user(user: User) -> User:
         """Activates user account"""
         user.is_activated = True
         user.save()
+        return user
 
     @staticmethod
-    def change_user_password(user: User, password: str) -> None:
+    def change_user_password(user: User, password: str) -> User:
         """Changes user password"""
         user.set_password(password)
         user.save()
+        return user
 
     @staticmethod
-    def update_user_data(user: User, data: dict) -> None:
+    def update_user_data(user: User, data: dict) -> User:
         """Update user data."""
         user.first_name = data['first_name']
         user.surname = data['surname']
@@ -113,4 +170,4 @@ class UserService:
         user.training_experience = data['training_experience']
         user.trains_now = data['trains_now']
         user.save()
-
+        return user

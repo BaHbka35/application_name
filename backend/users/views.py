@@ -10,9 +10,9 @@ from rest_framework.permissions import IsAuthenticated
 
 from .serializers import SignUpSerializer, LogInSerializer, \
                          UsersListSerializer, ChangePasswordSerializer, \
-                         UpdateUserDateSerializer
-from .models import User
-from .services import TokenService, UserService
+                         UpdateUserDateSerializer, ChangeUserEmailSerializer
+from .models import User, NotConfirmedEmail
+from .services import TokenService, UserService, EmailService
 
 
 class SignUpView(APIView):
@@ -21,7 +21,6 @@ class SignUpView(APIView):
     def post(self, request) -> Response:
         """
         Registrate user and send email for account activation.
-        Return response about success registration or about fail
         """
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -38,10 +37,7 @@ class AccountActivationView(APIView):
     """View for activate user account"""
 
     def get(self, request, id: int, token: str) -> Response:
-        """
-        Activate user and return response
-        about success registration or about fail.
-        """
+        """Activate user."""
         try:
             user = User.objects.get(id=id)
         except:
@@ -50,10 +46,7 @@ class AccountActivationView(APIView):
 
         if TokenService.check_activation_token(token, user):
             UserService.activate_user(user)
-            data = {
-                "message": "account was activated",
-            }
-            return Response(data=data, status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -65,8 +58,8 @@ class LogInView(APIView):
 
     def post(self, request) -> Response:
         """
-        Authenticate user and return response with data
-        with contain private token for authentication
+        Authenticate user and return response
+        with token for further authentication.
         """
         serializer = LogInSerializer(data=request.data)
         if serializer.is_valid():
@@ -165,3 +158,45 @@ class UsersListView(APIView):
         queryset = User.objects.all()
         serializer = UsersListSerializer(queryset, many=True)
         return json.loads(json.dumps(serializer.data))
+
+
+class UserChangeEmailView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        serializer = ChangeUserEmailSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = request.user
+        new_user_email = serializer.data['new_user_email']
+        NotConfirmedEmail(user=user, email=new_user_email).save()
+        EmailService.send_email_for_confirm_changing_email(
+            request, user, new_user_email)
+        return Response(status=status.HTTP_200_OK)
+
+
+class EmailConfirmationView(APIView):
+
+    def get(self, request, id, token):
+        user = User.objects.get(id=id)
+        not_confirmed_email = NotConfirmedEmail.objects.get(user=user)
+        new_user_email = not_confirmed_email.email
+        if TokenService.check_email_confirmation_token(
+                token, user, new_user_email):
+
+            user.email = new_user_email
+            user.save()
+            not_confirmed_email.delete()
+            return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
+
+
+
+
+
