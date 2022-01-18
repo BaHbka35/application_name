@@ -3,7 +3,7 @@ from django.test import TestCase
 from users.models import User
 
 
-def d__test_basic_field(self, user, name):
+def __test_basic_field(self, user: User, name: str) -> None:
     """Validates the fields of the created user."""
     self.assertEqual(user.first_name, f"{name}_first_name")
     self.assertEqual(user.surname, f"{name}_surname")
@@ -11,13 +11,14 @@ def d__test_basic_field(self, user, name):
     self.assertEqual(user.slug, f"{name}")
     self.assertEqual(user.email, f"{name}@gmail.com")
 
-def d__check_superuser_and_stuff_status(self, user, value: bool):
+
+def __check_superuser_and_stuff_status(self, user, value: bool) -> None:
     """Validates the admins fields of the created user."""
     self.assertEqual(user.is_superuser, value)
     self.assertEqual(user.is_staff, value)
 
 
-def dd__test_exstra_fields_with_default_value(self, user):
+def __test_extra_fields_with_default_value(self, user: User) -> None:
     self.assertEqual(user.age, None)
     self.assertEqual(user.gender, None)
     self.assertEqual(user.training_experience, None)
@@ -28,7 +29,7 @@ def dd__test_exstra_fields_with_default_value(self, user):
 
 class CreatingUserManagerTests(TestCase):
     """
-    Class for testing currect working 'objects' manager
+    Class for testing correct working 'objects' manager
     for creating base user.
     """
 
@@ -41,8 +42,8 @@ class CreatingUserManagerTests(TestCase):
             email="test@gmail.com",
             password="password",
             )
-        d__test_basic_field(self, user, 'test')
-        dd__test_exstra_fields_with_default_value(self, user)
+        __test_basic_field(self, user, 'test')
+        __test_extra_fields_with_default_value(self, user)
 
     def test_creating_base_user_without_first_name(self):
         """Tests creating user without first name."""
@@ -58,7 +59,7 @@ class CreatingUserManagerTests(TestCase):
     def test_creating_base_user_without_surname(self):
         """Tests creating user without surname."""
         with self.assertRaises(ValueError):
-            user = User.objects._create_base_user(
+            User.objects._create_base_user(
                 first_name="test_first_name",
                 surname="",
                 username="test",
@@ -69,7 +70,7 @@ class CreatingUserManagerTests(TestCase):
     def test_creating_base_user_without_username(self):
         """Tests creating user without username."""
         with self.assertRaises(ValueError):
-            user = User.objects._create_base_user(
+             User.objects._create_base_user(
                 first_name="test_first_name",
                 surname="test_surname",
                 username="",
@@ -80,7 +81,7 @@ class CreatingUserManagerTests(TestCase):
     def test_creating_base_user_without_email(self):
         """Tests creating user without email."""
         with self.assertRaises(ValueError):
-            user = User.objects._create_base_user(
+            User.objects._create_base_user(
                 first_name="test_first_name",
                 surname="test_surname",
                 username="test",
@@ -91,7 +92,7 @@ class CreatingUserManagerTests(TestCase):
     def test_creating_base_user_without_password(self):
         """Tests creating user without password."""
         with self.assertRaises(ValueError):
-            user = User.objects._create_base_user(
+            User.objects._create_base_user(
                 first_name="test_first_name",
                 surname="test_surname",
                 username="test",
@@ -102,7 +103,7 @@ class CreatingUserManagerTests(TestCase):
     def test_creating_base_user_with_unexisting_filds(self):
         """Tests creating user with unexisting filds."""
         with self.assertRaises(TypeError):
-            user = User.objects._create_base_user(
+            User.objects._create_base_user(
                 first_name="test_first_name",
                 surname="test_surname",
                 username="test",
@@ -122,7 +123,7 @@ class CreatingUserManagerTests(TestCase):
             age=18,
             gender="male",
             training_experience=5,
-            trains_now=True ,
+            trains_now=True,
             )
         self.assertEqual(user.age, 18)
         self.assertEqual(user.gender, "male")
@@ -130,7 +131,7 @@ class CreatingUserManagerTests(TestCase):
         self.assertEqual(user.trains_now, True)
 
     def test_creating_base_user_with_all_fielads_with_one_type_values(self):
-        """Tests creating user with all all field but that have different value."""
+        """Tests creating user with all field but that have different value."""
         user = User.objects._create_base_user(
             first_name="test_first_name",
             surname="test_surname",
@@ -164,8 +165,8 @@ class CreatingSuperuserTests(TestCase):
             is_superuser=False,
             is_activated=False,
         )
-        d__test_basic_field(self, user, "test")
-        d__check_superuser_and_stuff_status(self, user, True)
+        __test_basic_field(self, user, "test")
+        __check_superuser_and_stuff_status(self, user, True)
 
 
 class CreatingRegularUserTests(TestCase):
@@ -186,5 +187,5 @@ class CreatingRegularUserTests(TestCase):
             is_superuser=True,
             is_activated=True,
             )
-        d__test_basic_field(self, user, 'test')
-        d__check_superuser_and_stuff_status(self, user, False)
+        __test_basic_field(self, user, 'test')
+        __check_superuser_and_stuff_status(self, user, False)

@@ -12,7 +12,9 @@ from .serializers import SignUpSerializer, LogInSerializer, \
                          UsersListSerializer, ChangePasswordSerializer, \
                          UpdateUserDateSerializer, ChangeUserEmailSerializer
 from .models import User, NotConfirmedEmail
-from .services import TokenService, UserService, EmailService
+from .services.email_services import EmailService
+from .services.token_services import TokenService
+from .services.user_services import UserService
 
 
 class SignUpView(APIView):
