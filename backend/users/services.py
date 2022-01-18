@@ -16,7 +16,7 @@ class TokenService:
     @classmethod
     def get_activation_token(cls, user: User) -> str:
         """
-        Create token which will be send on user email
+        Create token which will be sent on user email
         for activate user account.
         """
         forming_str = f"{user.id}{user.username}"
@@ -26,7 +26,7 @@ class TokenService:
 
     @classmethod
     def check_activation_token(cls, token: str, user: User) -> bool:
-        """Check is givven token bolongs to current user"""
+        """Check is given token belongs to current user."""
         return token == cls.get_activation_token(user)
 
     @classmethod
@@ -44,8 +44,7 @@ class TokenService:
     def get_email_confirmation_token(cls, user: User,
                                      new_user_email: str) -> str:
         """
-        Create token which will be send on new user emal
-        for confirm changing email.
+        Create token which will be sent on new user email for confirm changing email.
         """
         forming_str = f"{user.id}{user.username}{new_user_email}"
         forming_str = forming_str.encode()
@@ -55,7 +54,7 @@ class TokenService:
     @classmethod
     def check_email_confirmation_token(cls, token: str, user: User,
                                        new_user_email: str) -> bool:
-        """Check is givven token bolongs to user who is changing email"""
+        """Check is given token belongs to user who is changing email."""
         return token == cls.get_email_confirmation_token(user, new_user_email)
 
 
@@ -69,10 +68,11 @@ class EmailService:
         ready_email = cls.__get_ready_activation_email(content, user)
         ready_email.send()
 
-    def __get_content_for_activation_email(request, user: User) -> dict:
+    @classmethod
+    def __get_content_for_activation_email(cls, request, user: User) -> dict:
         """
-        Forms conten for latter which will be
-        sent to user email fro activate account
+        Forms content for latter which will be
+        sent to user email for activate account.
         """
         token = TokenService.get_activation_token(user)
         current_site = get_current_site(request)
@@ -84,8 +84,9 @@ class EmailService:
         }
         return content
 
-    def __get_ready_activation_email(content, user: User) -> EmailMessage:
-        """Create email wich is ready to be sent to user."""
+    @classmethod
+    def __get_ready_activation_email(cls, content, user: User) -> EmailMessage:
+        """Create email witch is ready to be sent to user."""
         subject = 'Account activation'
         html_message = render_to_string(
             'users/email_for_activation_account.html', content)
@@ -97,17 +98,19 @@ class EmailService:
     @classmethod
     def send_email_for_confirm_changing_email(
             cls, request, user: User, new_user_email: str) -> None:
+        """Send email to new user email address for further confirmation his email"""
         content = cls.__get_content_for_confirm_changing_email(
                     request, user, new_user_email)
         ready_email = cls.__get_ready_email_for_confirm_changing(
-                        content, user, new_user_email)
+                        content, new_user_email)
         ready_email.send()
 
+    @classmethod
     def __get_content_for_confirm_changing_email(
-            request, user: User, new_user_email: str) -> dict:
+            cls, request, user: User, new_user_email: str) -> dict:
         """
-        Forms conten for latter which will be
-        sent to new user email for new email confirmation.
+        Forms content for latter which will be sent to
+        new user email for new email confirmation.
         """
         token = TokenService.get_email_confirmation_token(user, new_user_email)
         current_site = get_current_site(request)
@@ -119,9 +122,10 @@ class EmailService:
         }
         return content
 
+    @classmethod
     def __get_ready_email_for_confirm_changing(
-            content, user: User, new_user_email: str) -> EmailMessage:
-        """Create email wich is ready to be sent to new user email."""
+            cls, content, new_user_email: str) -> EmailMessage:
+        """Create email witch is ready to be sent to new user email."""
         subject = 'Email confirmation'
         html_message = render_to_string(
             'users/email_for_email_confirmation.html', content)
@@ -138,7 +142,7 @@ class UserService:
                                                   **data: dict) -> User:
         """
         Creates user and send him email with
-        link for account activation
+        link for activation his account.
         """
         user = User.objects.create_user(**data)
         EmailService.send_email_for_activate_account(request, user)
@@ -146,14 +150,14 @@ class UserService:
 
     @staticmethod
     def activate_user(user: User) -> User:
-        """Activates user account"""
+        """Activates user account."""
         user.is_activated = True
         user.save()
         return user
 
     @staticmethod
     def change_user_password(user: User, password: str) -> User:
-        """Changes user password"""
+        """Changes user password."""
         user.set_password(password)
         user.save()
         return user
