@@ -18,7 +18,8 @@ signup_data = {
 }
 
 
-class LogInTests(APITestCase):
+class LogInAPITests(APITestCase):
+    """Tests loging user in."""
 
     url = reverse('users:login')
 

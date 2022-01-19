@@ -4,7 +4,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from users.models import User
-from .for_tests import registrate_user, activate_user, login_user, get_auth_header
+from .for_tests import registrate_user, activate_user, get_auth_header
 
 
 signup_data = {
@@ -22,8 +22,8 @@ login_data = {
 }
 
 
-class UpdateUserDataTests(APITestCase):
-    """Class updates user data."""
+class UpdateUserDataAPITests(APITestCase):
+    """Class tests updating user data."""
 
     updating_data = {
         'first_name': 'Lexa',

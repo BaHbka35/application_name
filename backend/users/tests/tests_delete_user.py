@@ -35,7 +35,7 @@ class DeleteUserAccountTests(APITestCase):
 
 
     def test_delete_user(self):
-        """Check that user was delete successfuly."""
+        """Check that user was deleted successfully."""
         auth_header = get_auth_header(self, login_data)
         self.client.credentials(HTTP_AUTHORIZATION=auth_header)
         response = self.client.delete(self.url, format='json')

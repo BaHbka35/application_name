@@ -4,7 +4,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from users.models import User, NotConfirmedEmail
-from users.services import TokenService
+from users.services.token_services import TokenService
 from .for_tests import registrate_user, activate_user, get_auth_header
 
 
@@ -29,6 +29,7 @@ class EmailConfirmationTests(APITestCase):
     new_user_email = 'tochno_ne_danil@mail.ru'
 
     def setUp(self):
+        """Registrate, activate, login, and change user email."""
         response = registrate_user(self, signup_data)
         user = User.objects.get(username=response.data['username'])
         activate_user(self, user)
@@ -50,8 +51,13 @@ class EmailConfirmationTests(APITestCase):
         self.url = reverse('users:email_confirmation', kwargs=kwargs)
 
     def test_confirm_user_email(self):
+        """
+        Checks that user email was changed and his new
+        email address was deleted from temporary list.
+        """
         response = self.client.get(self.url)
         user = User.objects.get()
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(user.email, self.new_user_email)
         self.assertEqual(NotConfirmedEmail.objects.count(), 0)

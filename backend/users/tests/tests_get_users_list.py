@@ -31,7 +31,8 @@ signup_data2 = {
     }
 
 
-class UsersListTests(APITestCase):
+class UsersListAPITests(APITestCase):
+    """Tests getting list of users."""
 
     url = reverse('users:users_list')
 

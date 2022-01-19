@@ -23,7 +23,7 @@ login_data = {
 }
 
 
-class LogOutTests(APITestCase):
+class LogOutAPITests(APITestCase):
     """Class for testing logout user."""
 
     url = reverse('users:logout')
@@ -41,8 +41,9 @@ class LogOutTests(APITestCase):
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        user = User.objects.get()
         with self.assertRaises(Token.DoesNotExist):
-            Token.objects.get(user=self.user)
+            Token.objects.get(user=user)
 
     def test_logout_not_authenticated_user(self):
         """Tests try to log somebody out."""

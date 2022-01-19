@@ -6,7 +6,7 @@ from rest_framework import status
 from users.models import User
 
 
-class RegistrationAPITests(APITestCase):
+class SignUpAPITests(APITestCase):
     """Class for testing API witch intends for registrate user."""
 
     data = {
@@ -20,7 +20,7 @@ class RegistrationAPITests(APITestCase):
     url = reverse('users:signup')
 
     def test_create_account(self):
-        """Tests creating user with right fields"""
+        """Tests creating user with right fields."""
         response = self.client.post(self.url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(User.objects.get().username, 'Luk')
@@ -28,7 +28,7 @@ class RegistrationAPITests(APITestCase):
         self.assertEqual('password' in response.data, False)
 
     def test_create_account_with_different_passwords(self):
-        """Tests creating user with different passwords"""
+        """Tests creating user with different passwords."""
         data = self.data.copy()
         data['password2'] = 'other_password'
         response = self.client.post(self.url, data, format='json')

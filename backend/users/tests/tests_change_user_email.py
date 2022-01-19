@@ -2,10 +2,10 @@ from django.urls import reverse
 
 from rest_framework.test import APITestCase
 from rest_framework import status
-from rest_framework.authtoken.models import Token
 
 from users.models import User, NotConfirmedEmail
-from .for_tests import registrate_user, activate_user, login_user
+from .for_tests import registrate_user, activate_user, get_auth_header
+
 
 signup_data = {
     "first_name": "Sasha",
@@ -22,8 +22,8 @@ login_data = {
     }
 
 
-class ChangePasswordTests(APITestCase):
-    """Class for testing changing password."""
+class ChangeUserEmailTests(APITestCase):
+    """Class for testing changing user email address."""
 
     url = reverse('users:change_user_email')
     data = {
@@ -31,18 +31,14 @@ class ChangePasswordTests(APITestCase):
         }
 
     def setUp(self):
-        """Registrate, activaten user."""
+        """Registrate, activate user."""
         response = registrate_user(self, signup_data)
         user = User.objects.get(username=response.data['username'])
         activate_user(self, user)
 
     def test_change_user_email_with_true_data(self):
         """Tests changing user email with true data"""
-
-        response = login_user(self, login_data)
-        user_auth_token = response.data['token']
-
-        auth_header = 'Token ' + user_auth_token
+        auth_header = get_auth_header(self, login_data)
         self.client.credentials(HTTP_AUTHORIZATION=auth_header)
         response = self.client.put(self.url, data=self.data,
                                    format='json')
