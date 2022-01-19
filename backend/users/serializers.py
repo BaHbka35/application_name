@@ -10,7 +10,7 @@ def validate_first_name(first_name: str) -> str:
     for letter in first_name.lower():
         if letter in s:
             raise serializers\
-                .ValidationError("Name must contain only latters.")
+                .ValidationError('Name must contain only letters.')
     return first_name
 
 
@@ -20,7 +20,7 @@ def validate_surname(surname: str) -> str:
     for letter in surname.lower():
         if letter in s:
             raise serializers\
-                .ValidationError("Surname must contain only latters.")
+                .ValidationError('Surname must contain only letters.')
     return surname
 
 
@@ -31,21 +31,21 @@ class SignUpSerializer(serializers.Serializer):
     surname = serializers.CharField(max_length=30)
     username = serializers.CharField(
         max_length=30, validators=[UniqueValidator(
-        queryset=User.objects.all())]
+            queryset=User.objects.all())]
         )
 
     email = serializers.EmailField(
         max_length=50, validators=[UniqueValidator(
-        queryset=User.objects.all())]
+            queryset=User.objects.all())]
         )
     password = serializers.CharField(min_length=8)
     password2 = serializers.CharField(min_length=8, write_only=True)
 
     def validate(self, data: dict) -> dict:
         """Check that first password equal second"""
-        if data["password"] == data["password2"]:
+        if data['password'] == data['password2']:
             return data
-        raise serializers.ValidationError("Passwords doesn't match")
+        raise serializers.ValidationError('Passwords doesn\'t match')
 
     def validate_first_name(self, first_name: str) -> str:
         """Check that name doesn't contain 'bad' symbols"""
@@ -54,6 +54,7 @@ class SignUpSerializer(serializers.Serializer):
     def validate_surname(self, surname: str) -> str:
         """Check that surname doesn't contain 'bad' symbols"""
         return validate_surname(surname)
+
 
 class LogInSerializer(serializers.Serializer):
     """Serializer for login users."""
@@ -76,9 +77,9 @@ class ChangePasswordSerializer(serializers.Serializer):
 
     def validate(self, data: dict) -> dict:
         """Check that first password equal second"""
-        if data["new_password"] == data["new_password2"]:
+        if data['new_password'] == data['new_password2']:
             return data
-        raise serializers.ValidationError("Passwords doesn't match")
+        raise serializers.ValidationError('Passwords doesn\'t match')
 
 
 class UpdateUserDateSerializer(serializers.Serializer):
@@ -87,7 +88,7 @@ class UpdateUserDateSerializer(serializers.Serializer):
     surname = serializers.CharField(max_length=30, required=True)
     username = serializers.CharField(
         max_length=30, validators=[UniqueValidator(
-        queryset=User.objects.all())], required=True
+            queryset=User.objects.all())], required=True
         )
     age = serializers.IntegerField(min_value=1, required=True)
     gender = serializers.ChoiceField(choices=GENDER, required=True)
@@ -108,4 +109,17 @@ class UpdateUserDateSerializer(serializers.Serializer):
         if training_experience >= 0:
             return training_experience
         raise serializers.ValidationError(
-            "Training experience must be positive of null")
+            'Training experience must be positive of null')
+
+
+class ChangeUserEmailSerializer(serializers.Serializer):
+    """Serializer for changing user email."""
+    new_user_email = serializers.EmailField(required=True, max_length=50)
+
+    def validate_new_user_email(self, new_user_email: str) -> str:
+        """Checks that new user email is not using other user."""
+        try:
+            User.objects.get(email=new_user_email)
+        except User.DoesNotExist:
+            return new_user_email
+        raise serializers.ValidationError('This email is already using')

@@ -10,15 +10,15 @@ class UserManager(BaseUserManager):
                           **extra_fields: dict) -> User:
 
         if not first_name:
-            raise ValueError("User must have first name")
+            raise ValueError('User must have first name')
         if not surname:
-            raise ValueError("User must have surname name")
+            raise ValueError('User must have surname name')
         if not username:
-            raise ValueError("User must have username name")
+            raise ValueError('User must have username name')
         if not email:
-            raise ValueError("User must have email")
+            raise ValueError('User must have email')
         if not password:
-            raise ValueError("User must have password name")
+            raise ValueError('User must have password name')
 
         email = self.normalize_email(email)
         try:
@@ -29,7 +29,7 @@ class UserManager(BaseUserManager):
                               password=None,
                               **extra_fields)
         except TypeError:
-            raise TypeError("Unexisting field of model")
+            raise TypeError('Non existing field of model')
 
         user.set_password(password)
         user.slug = username
@@ -40,9 +40,9 @@ class UserManager(BaseUserManager):
                     username: str, email: str, password: str,
                     **extra_fields: dict) -> User:
 
-        extra_fields["is_superuser"] = False
-        extra_fields["is_staff"] = False
-        extra_fields["is_activated"] = False
+        extra_fields['is_superuser'] = False
+        extra_fields['is_staff'] = False
+        extra_fields['is_activated'] = False
         return self._create_base_user(first_name, surname, username,
                                       email, password, **extra_fields)
 
@@ -50,8 +50,8 @@ class UserManager(BaseUserManager):
                          username: str, email: str, password: str,
                          **extra_fields: dict) -> User:
 
-        extra_fields["is_superuser"] = True
-        extra_fields["is_staff"] = True
-        extra_fields["is_activated"] = True
+        extra_fields['is_superuser'] = True
+        extra_fields['is_staff'] = True
+        extra_fields['is_activated'] = True
         return self._create_base_user(first_name, surname, username,
                                       email, password, **extra_fields)

@@ -1,0 +1,7 @@
+{% block content %}
+
+Hi, {{ user.username }} click on link for confirm new email.
+
+http://{{ domain }}{% url 'users:email_confirmation' id token %}
+
+{% endblock content %}

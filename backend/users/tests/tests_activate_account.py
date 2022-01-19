@@ -4,7 +4,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from users.models import User
-from users.services import TokenService
+from users.services.token_services import TokenService
 
 
 class AccountActivationAPITests(APITestCase):

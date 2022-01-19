@@ -2,25 +2,24 @@ from django.urls import reverse
 
 from rest_framework.test import APITestCase
 from rest_framework import status
-from rest_framework.authtoken.models import Token
 
 from users.models import User
-from .for_tests import registrate_user, activate_user, login_user
+from .for_tests import registrate_user, activate_user, get_auth_header
 
 
 signup_data = {
-    "first_name": "Sasha",
-    "surname": "Kurkin",
-    "username": "Luk",
-    "email": "nepetr86@bk.ru",
-    "password": "123456789",
-    "password2": "123456789"
-    }
+    'first_name': 'Sasha',
+    'surname': 'Kurkin',
+    'username': 'Luk',
+    'email': 'nepetr86@bk.ru',
+    'password': '123456789',
+    'password2': '123456789'
+}
 
 login_data = {
-    "username": "Luk",
-    "password": "123456789",
-    }
+    'username': 'Luk',
+    'password': '123456789'
+}
 
 
 class DeleteUserAccountTests(APITestCase):
@@ -36,12 +35,8 @@ class DeleteUserAccountTests(APITestCase):
 
 
     def test_delete_user(self):
-        """Check that user was delete successfuly."""
-        user = User.objects.get()
-        response = login_user(self, login_data)
-        user_auth_token = response.data['token']
-
-        auth_header = 'Token ' + user_auth_token
+        """Check that user was deleted successfully."""
+        auth_header = get_auth_header(self, login_data)
         self.client.credentials(HTTP_AUTHORIZATION=auth_header)
         response = self.client.delete(self.url, format='json')
 
