@@ -4,7 +4,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from users.models import User
-from users.services import TokenService
+from users.services.token_services import TokenService
 
 
 class AccountActivationAPITests(APITestCase):
@@ -31,8 +31,8 @@ class AccountActivationAPITests(APITestCase):
         url = reverse('users:activate_account',
                       kwargs={"id": user.id, "token": activation_token})
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
         user = User.objects.get()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(user.is_activated, True)
 
     def test_activate_account_with_wrong_token(self):
@@ -42,8 +42,8 @@ class AccountActivationAPITests(APITestCase):
         url = reverse('users:activate_account',
                       kwargs={"id": user.id, "token": activation_token})
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         user = User.objects.get()
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(user.is_activated, False)
 
     def test_activate_account_with_wrong_id(self):
