@@ -1,6 +1,7 @@
 User API - /users/
 ## User registration
 **POST signup/**
+
 Input:
 ```
 	{
