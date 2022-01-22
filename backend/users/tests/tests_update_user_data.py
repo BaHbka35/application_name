@@ -4,7 +4,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from users.models import User
-from .for_tests import registrate_user, activate_user, get_auth_header
+from .for_tests import registrate_user, activate_user, get_auth_headers, set_auth_headers
 
 
 signup_data = {
@@ -47,12 +47,12 @@ class UpdateUserDataAPITests(APITestCase):
         """Tests update user date without login."""
         response = self.client.put(self.url, data=self.updating_data,
                                    format='json')
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_update_user_data_with_right_data(self):
         """Tests correct updating user data with right data"""
-        auth_header = get_auth_header(self, login_data)
-        self.client.credentials(HTTP_AUTHORIZATION=auth_header)
+        token, signature = get_auth_headers(self, login_data)
+        set_auth_headers(self, token, signature)
         response = self.client.put(self.url, data=self.updating_data,
                                    format='json')
 
@@ -85,8 +85,8 @@ class UpdateUserDataAPITests(APITestCase):
         data = self.updating_data.copy()
         data['training_experience'] = -4.5
 
-        auth_header = get_auth_header(self, login_data)
-        self.client.credentials(HTTP_AUTHORIZATION=auth_header)
+        token, signature = get_auth_headers(self, login_data)
+        set_auth_headers(self, token, signature)
 
         response = self.client.put(self.url, data=data, format='json')
 
@@ -99,8 +99,8 @@ class UpdateUserDataAPITests(APITestCase):
         data = self.updating_data.copy()
         data['age'] = -19
 
-        auth_header = get_auth_header(self, login_data)
-        self.client.credentials(HTTP_AUTHORIZATION=auth_header)
+        token, signature = get_auth_headers(self, login_data)
+        set_auth_headers(self, token, signature)
         response = self.client.put(self.url, data=data, format='json')
 
         user = User.objects.get()
@@ -115,8 +115,8 @@ class UpdateUserDataAPITests(APITestCase):
         data = self.updating_data.copy()
         data['first_name'] = 'laa342:234111'
 
-        auth_header = get_auth_header(self, login_data)
-        self.client.credentials(HTTP_AUTHORIZATION=auth_header)
+        token, signature = get_auth_headers(self, login_data)
+        set_auth_headers(self, token, signature)
         response = self.client.put(self.url, data=data, format='json')
 
         user = User.objects.get()
@@ -128,8 +128,8 @@ class UpdateUserDataAPITests(APITestCase):
         data = self.updating_data.copy()
         data['surname'] = 'laa342:234111'
 
-        auth_header = get_auth_header(self, login_data)
-        self.client.credentials(HTTP_AUTHORIZATION=auth_header)
+        token, signature = get_auth_headers(self, login_data)
+        set_auth_headers(self, token, signature)
         response = self.client.put(self.url, data=data, format='json')
 
         user = User.objects.get()
@@ -141,8 +141,8 @@ class UpdateUserDataAPITests(APITestCase):
         data = self.updating_data.copy()
         data['gender'] = 'wrong'
 
-        auth_header = get_auth_header(self, login_data)
-        self.client.credentials(HTTP_AUTHORIZATION=auth_header)
+        token, signature = get_auth_headers(self, login_data)
+        set_auth_headers(self, token, signature)
         response = self.client.put(self.url, data=data, format='json')
 
         user = User.objects.get()
@@ -154,8 +154,8 @@ class UpdateUserDataAPITests(APITestCase):
         data = self.updating_data.copy()
         data['gender'] = 'female'
 
-        auth_header = get_auth_header(self, login_data)
-        self.client.credentials(HTTP_AUTHORIZATION=auth_header)
+        token, signature = get_auth_headers(self, login_data)
+        set_auth_headers(self, token, signature)
         response = self.client.put(self.url, data=data, format='json')
 
         user = User.objects.get()

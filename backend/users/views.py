@@ -15,6 +15,7 @@ from .models import User, NotConfirmedEmail
 from .services.email_services import EmailService
 from .services.token_services import TokenService
 from .services.user_services import UserService
+from .services.token_signature_services import TokenSignatureService
 
 
 class SignUpView(APIView):
@@ -71,8 +72,9 @@ class LogInView(APIView):
                                 status=status.HTTP_400_BAD_REQUEST)
             if user.is_activated:
                 token = TokenService.get_user_auth_token(user)
-                return Response(data={'token': token},
-                                status=status.HTTP_200_OK)
+                signature = TokenSignatureService.get_signature(token)
+                data = {'token': token, 'signature': signature}
+                return Response(data=data, status=status.HTTP_200_OK)
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -157,7 +159,7 @@ class UsersListView(APIView):
 
 
 class UserChangeEmailView(APIView):
-    """Class for changing user email"""
+    """Class for changing user email."""
 
     permission_classes = [IsAuthenticated]
 

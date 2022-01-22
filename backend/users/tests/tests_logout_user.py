@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 
 from users.models import User
-from .for_tests import registrate_user, activate_user, get_auth_header
+from .for_tests import registrate_user, activate_user, get_auth_headers, set_auth_headers
 
 
 signup_data = {
@@ -36,8 +36,8 @@ class LogOutAPITests(APITestCase):
 
     def test_logout_user(self):
         """Tests log user out."""
-        auth_header = get_auth_header(self, login_data)
-        self.client.credentials(HTTP_AUTHORIZATION=auth_header)
+        token, signature = get_auth_headers(self, login_data)
+        set_auth_headers(self, token, signature)
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -48,4 +48,4 @@ class LogOutAPITests(APITestCase):
     def test_logout_not_authenticated_user(self):
         """Tests try to log somebody out."""
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
