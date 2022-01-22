@@ -15,6 +15,7 @@ from .models import User, NotConfirmedEmail
 from .services.email_services import EmailService
 from .services.token_services import TokenService
 from .services.user_services import UserService
+from .services.token_signature_services import TokenSignatureService
 
 
 class SignUpView(APIView):
@@ -26,8 +27,8 @@ class SignUpView(APIView):
         """
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        UserService.create_user_and_send_email_for_activation(
-            request, **serializer.data)
+        user = User.objects.create_user(**serializer.data)
+        EmailService.send_email_for_activate_account(request, user)
         data = serializer.data
         data["message"] = "Check your email for activate account."
         del data['password']
@@ -71,8 +72,9 @@ class LogInView(APIView):
                                 status=status.HTTP_400_BAD_REQUEST)
             if user.is_activated:
                 token = TokenService.get_user_auth_token(user)
-                return Response(data={'token': token},
-                                status=status.HTTP_200_OK)
+                signature = TokenSignatureService.get_signature(token)
+                data = {'token': token, 'signature': signature}
+                return Response(data=data, status=status.HTTP_200_OK)
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -157,7 +159,7 @@ class UsersListView(APIView):
 
 
 class UserChangeEmailView(APIView):
-    """Class for changing user email"""
+    """Class for changing user email."""
 
     permission_classes = [IsAuthenticated]
 

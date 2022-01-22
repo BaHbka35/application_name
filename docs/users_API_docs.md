@@ -1,6 +1,7 @@
 User API - /users/
 ## User registration
 **POST signup/**
+
 Input:
 ```
 	{
@@ -13,6 +14,7 @@ Input:
 	}
 ```
 Output:
+
 if registration was successful:
 	status: 201 ok
 ```
@@ -26,8 +28,10 @@ if registration was successful:
 if not:
 	status: 400 bad request
 	
+
 ## User account activation
 **GET activate_account/<user_id>/<activation_token>**
+
 Input: {}
 Output:
 	if success:
@@ -37,6 +41,7 @@ Output:
 		
 ## User login
 **POST login/**
+
 Input:
 ```
 	{
@@ -50,14 +55,20 @@ Output:
 		```
 		{
 		"token": "some_token",
+		"signature": "some_signature",
 		}
 		```
 	if not:
 		status: 400 bad request
+	### Important.
+	When user must be logined, server must get request with headers:
+	- Token
+	- Signature
 		
 ## User logout
 !!! User must be logined
 **GET logout/**
+
 Input: {}
 Output:
 	If success:
@@ -68,6 +79,7 @@ Output:
 ## Change user password
 !!! User must be logined
 **PUT change_user_password/**
+
 Input: 
 ```
 	{
@@ -85,6 +97,7 @@ Output:
 ## Delete user account
 !!! User must be logined
 **DELETE delete_user_account/**
+
 Input: {}
 Output:
 	If success:
@@ -95,6 +108,7 @@ Output:
 ## Update user data
 !!! User must be logined
 **PUT update_user_data/**
+
 Input:
 ```
 		{
@@ -116,6 +130,7 @@ Output:
 ## Get users list
 !!! User must be logined
 **GET users_list/**
+
 Input: {}
 Output:
 	If success:
