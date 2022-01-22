@@ -27,8 +27,8 @@ class SignUpView(APIView):
         """
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        UserService.create_user_and_send_email_for_activation(
-            request, **serializer.data)
+        user = User.objects.create_user(**serializer.data)
+        EmailService.send_email_for_activate_account(request, user)
         data = serializer.data
         data["message"] = "Check your email for activate account."
         del data['password']

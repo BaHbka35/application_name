@@ -6,17 +6,6 @@ class UserService:
     """Class witch contain all logic belongs to user"""
 
     @staticmethod
-    def create_user_and_send_email_for_activation(request,
-                                                  **data: dict) -> User:
-        """
-        Creates user and send him email with
-        link for activation his account.
-        """
-        user = User.objects.create_user(**data)
-        EmailService.send_email_for_activate_account(request, user)
-        return user
-
-    @staticmethod
     def activate_user(user: User) -> User:
         """Activates user account."""
         user.is_activated = True
