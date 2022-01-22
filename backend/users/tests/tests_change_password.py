@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 
 from users.models import User
-from .for_tests import registrate_user, activate_user, login_user, get_auth_header
+from .for_tests import registrate_user, activate_user, login_user, get_auth_headers, set_auth_headers
 
 signup_data = {
     'first_name': 'Sasha',
@@ -44,13 +44,13 @@ class ChangePasswordTests(APITestCase):
         Checks that password was changed, auth token was deleted.
         Checks that users can log in with new password.
         """
-        auth_header = get_auth_header(self, login_data)
-        self.client.credentials(HTTP_AUTHORIZATION=auth_header)
+        token, signature = get_auth_headers(self, login_data)
+        set_auth_headers(self, token, signature)
         response = self.client.put(self.url, data=self.data,
-                                    format='json')
+                                   format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.__check_that_password_was_changed_successfully()
-        self.__check_successfully_login_with_new_password(auth_header.split()[1])
+        self.__check_successfully_login_with_new_password(token)
 
     def __check_that_password_was_changed_successfully(self):
         """
@@ -59,11 +59,11 @@ class ChangePasswordTests(APITestCase):
         """
         user = User.objects.get(username="Luk")
         self.assertEqual(user.check_password(
-                         self.data["old_password"]), False)
+                         self.data['old_password']), False)
         self.assertEqual(user.check_password(
-                         self.data["new_password"]), True)
+                         self.data['new_password']), True)
         with self.assertRaises(Token.DoesNotExist):
-            token = Token.objects.get(user=user)
+            Token.objects.get(user=user)
 
     def __check_successfully_login_with_new_password(self, user_auth_token):
         """Check that user can log in with new password."""
@@ -88,10 +88,10 @@ class ChangePasswordTests(APITestCase):
             'new_password2': 'second_password'
             }
 
-        auth_header = get_auth_header(self, login_data)
-        self.client.credentials(HTTP_AUTHORIZATION=auth_header)
+        token, signature = get_auth_headers(self, login_data)
+        set_auth_headers(self, token, signature)
         response = self.client.put(self.url, data=data,
-                                    format='json')
+                                   format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_short_new_password(self):
@@ -111,13 +111,12 @@ class ChangePasswordTests(APITestCase):
             'new_password2': 'short',
             }
 
-        auth_header = get_auth_header(self, login_data)
-        self.client.credentials(HTTP_AUTHORIZATION=auth_header)
+        token, signature = get_auth_headers(self, login_data)
+        set_auth_headers(self, token, signature)
 
         response = self.client.put(self.url, data=data,
-                                    format='json')
+                                   format='json')
         response2 = self.client.put(self.url, data=data2,
                                     format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response2.status_code, status.HTTP_400_BAD_REQUEST)
-

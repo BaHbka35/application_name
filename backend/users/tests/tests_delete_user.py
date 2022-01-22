@@ -4,7 +4,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from users.models import User
-from .for_tests import registrate_user, activate_user, get_auth_header
+from .for_tests import registrate_user, activate_user, get_auth_headers, set_auth_headers
 
 
 signup_data = {
@@ -28,16 +28,15 @@ class DeleteUserAccountTests(APITestCase):
     url = reverse('users:delete_user_account')
 
     def setUp(self):
-        """Registrate, activaten user."""
+        """Registrate, activate user."""
         response = registrate_user(self, signup_data)
         user = User.objects.get(username=response.data['username'])
         activate_user(self, user)
 
-
     def test_delete_user(self):
         """Check that user was deleted successfully."""
-        auth_header = get_auth_header(self, login_data)
-        self.client.credentials(HTTP_AUTHORIZATION=auth_header)
+        token, signature = get_auth_headers(self, login_data)
+        set_auth_headers(self, token, signature)
         response = self.client.delete(self.url, format='json')
 
         users_amount = User.objects.all().count()

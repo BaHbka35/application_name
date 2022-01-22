@@ -26,8 +26,14 @@ def login_user(self, login_data: dict):
     return response
 
 
-def get_auth_header(self, login_data: dict) -> str:
-    """Returns string representation of authentication header."""
+def get_auth_headers(self, login_data: dict) -> tuple:
+    """Returns string representation of authentication headers."""
     response = login_user(self, login_data)
     user_auth_token = response.data['token']
-    return 'Token ' + user_auth_token
+    signature = response.data['signature']
+    return user_auth_token, signature
+
+
+def set_auth_headers(self, token: str, signature: str) -> None:
+    """Sets headers for authentication."""
+    self.client.credentials(HTTP_TOKEN=token, HTTP_SIGNATURE=signature)

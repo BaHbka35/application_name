@@ -4,7 +4,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from users.models import User, NotConfirmedEmail
-from .for_tests import registrate_user, activate_user, get_auth_header
+from .for_tests import registrate_user, activate_user, get_auth_headers, set_auth_headers
 
 
 signup_data = {
@@ -38,8 +38,8 @@ class ChangeUserEmailTests(APITestCase):
 
     def test_change_user_email_with_true_data(self):
         """Tests changing user email with true data"""
-        auth_header = get_auth_header(self, login_data)
-        self.client.credentials(HTTP_AUTHORIZATION=auth_header)
+        token, signature = get_auth_headers(self, login_data)
+        set_auth_headers(self, token, signature)
         response = self.client.put(self.url, data=self.data,
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)

@@ -5,7 +5,7 @@ from rest_framework import status
 
 from users.models import User, NotConfirmedEmail
 from users.services.token_services import TokenService
-from .for_tests import registrate_user, activate_user, get_auth_header
+from .for_tests import registrate_user, activate_user, get_auth_headers, set_auth_headers
 
 
 signup_data = {
@@ -39,8 +39,8 @@ class EmailConfirmationTests(APITestCase):
         }
         changing_email_url = reverse('users:change_user_email')
 
-        auth_header = get_auth_header(self, login_data)
-        self.client.credentials(HTTP_AUTHORIZATION=auth_header)
+        token, signature = get_auth_headers(self, login_data)
+        set_auth_headers(self, token, signature)
         self.client.put(changing_email_url, data=changing_email_data, format='json')
 
         token = TokenService.get_email_confirmation_token(user, self.new_user_email)
