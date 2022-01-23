@@ -5,6 +5,7 @@ from rest_framework import status
 
 from users.models import User
 from users.services.token_services import TokenService
+from users.services.datetime_services import DatetimeService
 
 
 class AccountActivationAPITests(APITestCase):
@@ -27,9 +28,14 @@ class AccountActivationAPITests(APITestCase):
     def test_activate_account(self):
         """Tests account activation with true activation_token"""
         user = User.objects.get()
-        activation_token = TokenService.get_activation_token(user)
+        encrypted_datetime = DatetimeService.get_encrypted_datetime()
+        activation_token = TokenService.get_activation_token(user, encrypted_datetime)
         url = reverse('users:activate_account',
-                      kwargs={"id": user.id, "token": activation_token})
+                      kwargs={'id': user.id,
+                              'encrypted_datetime': encrypted_datetime,
+                              'token': activation_token
+                              }
+                      )
         response = self.client.get(url)
         user = User.objects.get()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -38,9 +44,14 @@ class AccountActivationAPITests(APITestCase):
     def test_activate_account_with_wrong_token(self):
         """Tests account activation with false activation_token"""
         user = User.objects.get()
+        encrypted_datetime = DatetimeService.get_encrypted_datetime()
         activation_token = "aljfla8ajdklf43"
         url = reverse('users:activate_account',
-                      kwargs={"id": user.id, "token": activation_token})
+                      kwargs={'id': user.id,
+                              'encrypted_datetime': encrypted_datetime,
+                              'token': activation_token
+                              }
+                      )
         response = self.client.get(url)
         user = User.objects.get()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -49,8 +60,13 @@ class AccountActivationAPITests(APITestCase):
     def test_activate_account_with_wrong_id(self):
         """Tests account activation with wrong given user id."""
         user = User.objects.get()
-        activation_token = TokenService.get_activation_token(user)
+        encrypted_datetime = DatetimeService.get_encrypted_datetime()
+        activation_token = TokenService.get_activation_token(user, encrypted_datetime)
         url = reverse('users:activate_account',
-                      kwargs={"id": 333, "token": activation_token})
+                      kwargs={'id': 4423,
+                              'encrypted_datetime': encrypted_datetime,
+                              'token': activation_token
+                              }
+                      )
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

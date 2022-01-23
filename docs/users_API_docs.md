@@ -3,7 +3,7 @@ User API - /users/
 **POST signup/**
 
 Input:
-```
+```json
 	{
 	"first_name": "some_first_name",
 	"surname": "some_surname",
@@ -17,20 +17,24 @@ Output:
 
 if registration was successful:
 	status: 201 ok
-```
+```json
 	{
 	"first_name": "some_first_name",
 	"surname": "some_surname",
 	"username": "some_usename",
-	"email": "some_email@email.com"
+	"email": "some_email@email.com",
+	"message": "Check your email for activate account"
 	}
 ```
 if not:
 	status: 400 bad request
-	
+
+​	and json with messages
+
+After that user must get email letter with activation link.
 
 ## User account activation
-**GET activate_account/<user_id>/<activation_token>**
+**GET activate_account/<user_id>/<encrypted_datetime>/<activation_token>**
 
 Input: {}
 Output:
@@ -39,6 +43,7 @@ Output:
 	if not:
 		status: 400 bad request
 		
+
 ## User login
 **POST login/**
 
@@ -56,15 +61,15 @@ Output:
 		{
 		"token": "some_token",
 		"signature": "some_signature",
-		}
+	}
 		```
 	if not:
 		status: 400 bad request
 	### Important.
-	When user must be logined, server must get request with headers:
-	- Token
-	- Signature
-		
+​	When user must be logined, server must get request with headers:
+ - Token
+ - Signature
+
 ## User logout
 !!! User must be logined
 **GET logout/**
@@ -110,16 +115,16 @@ Output:
 **PUT update_user_data/**
 
 Input:
-```
-		{
-        'first_name': 'some_first_name',
-        'surname': 'some_surname',
-        'username': 'some_username',
-        'age': 18,
-        'gender': 'male or female',
-        'training_experience': 4.5,
-        'trains_now': True or False,
-    	}
+```json
+{
+    'first_name': 'some_first_name',
+    'surname': 'some_surname',
+    'username': 'some_username',
+    'age': 18,
+    'gender': 'male or female',
+    'training_experience': 4.5,
+    'trains_now': True or False,
+}
 ```
 Output:
 	If success:

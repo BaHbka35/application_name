@@ -1,6 +1,7 @@
 from django.urls import reverse
 
 from users.services.token_services import TokenService
+from users.services.datetime_services import DatetimeService
 
 
 def registrate_user(self, signup_data: dict):
@@ -12,9 +13,14 @@ def registrate_user(self, signup_data: dict):
 
 def activate_user(self, user):
     """Activate user"""
-    activation_token = TokenService.get_activation_token(user)
+    encrypted_datetime = DatetimeService.get_encrypted_datetime()
+    activation_token = TokenService.get_activation_token(user, encrypted_datetime)
     url = reverse('users:activate_account',
-                  kwargs={"id": user.id, "token": activation_token})
+                  kwargs={'id': user.id,
+                          'encrypted_datetime': encrypted_datetime,
+                          'token': activation_token
+                          }
+                  )
     response = self.client.get(url)
     return response
 

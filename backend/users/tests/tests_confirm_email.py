@@ -5,6 +5,7 @@ from rest_framework import status
 
 from users.models import User, NotConfirmedEmail
 from users.services.token_services import TokenService
+from users.services.datetime_services import DatetimeService
 from .for_tests import registrate_user, activate_user, get_auth_headers, set_auth_headers
 
 
@@ -43,11 +44,13 @@ class EmailConfirmationTests(APITestCase):
         set_auth_headers(self, token, signature)
         self.client.put(changing_email_url, data=changing_email_data, format='json')
 
-        token = TokenService.get_email_confirmation_token(user, self.new_user_email)
-        kwargs = {
-            'id': user.id,
-            'token': token,
-        }
+        encrypted_datetime = DatetimeService.get_encrypted_datetime()
+        token = TokenService.get_email_confirmation_token(user, encrypted_datetime, self.new_user_email)
+        kwargs = {'id': user.id,
+                  'encrypted_datetime': encrypted_datetime,
+                  'token': token
+                  }
+
         self.url = reverse('users:email_confirmation', kwargs=kwargs)
 
     def test_confirm_user_email(self):
