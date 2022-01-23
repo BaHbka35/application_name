@@ -11,20 +11,21 @@ class TokenService:
     """Class for different tokens."""
 
     @classmethod
-    def get_activation_token(cls, user: User) -> str:
+    def get_activation_token(cls, user: User, encrypted_datatime: str) -> str:
         """
         Create token which will be sent on user email
         for activate user account.
         """
-        forming_str = f"{user.id}{user.username}"
+        forming_str = f"{user.id}{user.username}{encrypted_datatime}"
         forming_str = forming_str.encode()
         hash_object = hashlib.sha256(forming_str + settings.SECRET_KEY_BYTES)
         return hash_object.hexdigest()
 
     @classmethod
-    def check_activation_token(cls, token: str, user: User) -> bool:
+    def check_activation_token(cls, user: User, encrypted_datatime,
+                               token: str) -> bool:
         """Check is given token belongs to current user."""
-        return token == cls.get_activation_token(user)
+        return token == cls.get_activation_token(user, encrypted_datatime)
 
     @classmethod
     def get_user_auth_token(cls, user: User) -> str:

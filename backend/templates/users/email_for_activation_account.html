@@ -2,6 +2,6 @@
 
 Hi, {{ user.username }} click on link for activate your account.
 
-http://{{ domain }}{% url 'users:activate_account' id token %}
+http://{{ domain }}{% url 'users:activate_account' id encrypted_datatime token %}
 
 {% endblock content %}

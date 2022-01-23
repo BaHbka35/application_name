@@ -16,6 +16,7 @@ from .services.email_services import EmailService
 from .services.token_services import TokenService
 from .services.user_services import UserService
 from .services.token_signature_services import TokenSignatureService
+from .services.datetime_services import DatetimeService
 
 
 class SignUpView(APIView):
@@ -38,7 +39,7 @@ class SignUpView(APIView):
 class AccountActivationView(APIView):
     """View for activate user account."""
 
-    def get(self, request, id: int, token: str) -> Response:
+    def get(self, request, id: int, encrypted_datatime: str, token: str) -> Response:
         """Activate user."""
         try:
             user = User.objects.get(id=id)
@@ -46,7 +47,10 @@ class AccountActivationView(APIView):
             data = {"message": "Activation account is failed."}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
-        if TokenService.check_activation_token(token, user):
+        if not DatetimeService.check_encrypted_datetime(encrypted_datatime):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        if TokenService.check_activation_token(user, encrypted_datatime, token):
             UserService.activate_user(user)
             return Response(status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)

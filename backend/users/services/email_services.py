@@ -4,6 +4,7 @@ from django.template.loader import render_to_string
 
 from users.models import User
 from .token_services import TokenService
+from .datetime_services import DatetimeService
 
 
 class EmailService:
@@ -12,14 +13,16 @@ class EmailService:
     @classmethod
     def send_email_for_activate_account(cls, request, user: User) -> None:
         """Send email to user email with activation link."""
-        token = TokenService.get_activation_token(user)
-        content = cls.__get_content_for_email(request, user, token)
+        encrypted_datatime = DatetimeService.get_encrypted_datetime()
+        token = TokenService.get_activation_token(user, encrypted_datatime)
+        content = cls.__get_content_for_email(request, user, token,
+                                              encrypted_datatime)
         ready_email = cls.__get_ready_activation_email(content, user)
         ready_email.send()
 
     @classmethod
     def __get_ready_activation_email(cls, content, user: User) -> EmailMessage:
-        """Create activaton email which is ready to be sent to user."""
+        """Create activation email which is ready to be sent to user."""
         subject = 'Account activation'
         html_message = render_to_string(
             'users/email_for_activation_account.html', content)
@@ -55,12 +58,14 @@ class EmailService:
         return email
 
     @classmethod
-    def __get_content_for_email(cls, request, user: User, token: str) -> tuple:
+    def __get_content_for_email(cls, request, user: User, token: str,
+                                encrypted_datatime: str) -> tuple:
         """Forms content for email latter."""
         current_site = get_current_site(request)
         content = {
             'user': user,
             'id': user.id,
+            'encrypted_datatime': encrypted_datatime,
             'token': token,
             'domain': current_site.domain
         }
