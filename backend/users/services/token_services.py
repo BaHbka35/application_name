@@ -39,8 +39,8 @@ class TokenService:
         token.delete()
 
     @classmethod
-    def get_email_confirmation_token(cls, user: User, new_user_email: str,
-                                     encrypted_datetime: str) -> str:
+    def get_email_confirmation_token(cls, user: User, encrypted_datetime: str,
+                                     new_user_email: str) -> str:
         """
         Create token which will be sent on new user email for confirm changing email.
         """

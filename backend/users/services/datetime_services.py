@@ -16,18 +16,18 @@ class DatetimeService:
 
     @classmethod
     def get_encrypted_datetime(cls) -> str:
-
+        """Return encrypted datetime in str representation."""
         datetime_obj_now = datetime.datetime.now()
         datetime_str_now = datetime_obj_now.strftime("%Y-%m-%d %H:%M:%S")
 
         forming_str = datetime_str_now.encode()
-        encrypted_datatime = cls.fernet.encrypt(forming_str)
+        encrypted_datetime = cls.fernet.encrypt(forming_str)
 
-        return encrypted_datatime.decode()
+        return encrypted_datetime.decode()
 
     @classmethod
     def check_encrypted_datetime(cls, encrypted_datetime: str) -> bool:
-
+        """Checks encrypted datetime. Return True if all is good."""
         encrypted_datetime_bytes = encrypted_datetime.encode()
         try:
             a = cls.fernet.decrypt(encrypted_datetime_bytes)

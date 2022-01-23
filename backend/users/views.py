@@ -43,17 +43,21 @@ class AccountActivationView(APIView):
         """Activate user."""
         try:
             user = User.objects.get(id=id)
-        except:
-            data = {"message": "Activation account is failed."}
+        except User.DoesNotExist:
+            data = {'message': 'Activation account is failed.'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
         if not DatetimeService.check_encrypted_datetime(encrypted_datetime):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            data = {'message': 'Lifetime of token is finished.'}
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
         if TokenService.check_activation_token(user, encrypted_datetime, token):
             UserService.activate_user(user)
-            return Response(status=status.HTTP_200_OK)
+            data = {'message': 'User activation was successful.'}
+            return Response(data=data, status=status.HTTP_200_OK)
+
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class LogInView(APIView):
