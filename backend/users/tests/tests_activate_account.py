@@ -28,11 +28,11 @@ class AccountActivationAPITests(APITestCase):
     def test_activate_account(self):
         """Tests account activation with true activation_token"""
         user = User.objects.get()
-        encrypted_datatime = DatetimeService.get_encrypted_datetime()
-        activation_token = TokenService.get_activation_token(user, encrypted_datatime)
+        encrypted_datetime = DatetimeService.get_encrypted_datetime()
+        activation_token = TokenService.get_activation_token(user, encrypted_datetime)
         url = reverse('users:activate_account',
                       kwargs={'id': user.id,
-                              'encrypted_datatime': encrypted_datatime,
+                              'encrypted_datetime': encrypted_datetime,
                               'token': activation_token
                               }
                       )
@@ -44,11 +44,11 @@ class AccountActivationAPITests(APITestCase):
     def test_activate_account_with_wrong_token(self):
         """Tests account activation with false activation_token"""
         user = User.objects.get()
-        encrypted_datatime = DatetimeService.get_encrypted_datetime()
+        encrypted_datetime = DatetimeService.get_encrypted_datetime()
         activation_token = "aljfla8ajdklf43"
         url = reverse('users:activate_account',
                       kwargs={'id': user.id,
-                              'encrypted_datatime': encrypted_datatime,
+                              'encrypted_datetime': encrypted_datetime,
                               'token': activation_token
                               }
                       )
@@ -60,11 +60,11 @@ class AccountActivationAPITests(APITestCase):
     def test_activate_account_with_wrong_id(self):
         """Tests account activation with wrong given user id."""
         user = User.objects.get()
-        encrypted_datatime = DatetimeService.get_encrypted_datetime()
-        activation_token = TokenService.get_activation_token(user, encrypted_datatime)
+        encrypted_datetime = DatetimeService.get_encrypted_datetime()
+        activation_token = TokenService.get_activation_token(user, encrypted_datetime)
         url = reverse('users:activate_account',
                       kwargs={'id': 4423,
-                              'encrypted_datatime': encrypted_datatime,
+                              'encrypted_datetime': encrypted_datetime,
                               'token': activation_token
                               }
                       )

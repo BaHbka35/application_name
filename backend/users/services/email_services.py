@@ -13,10 +13,10 @@ class EmailService:
     @classmethod
     def send_email_for_activate_account(cls, request, user: User) -> None:
         """Send email to user email with activation link."""
-        encrypted_datatime = DatetimeService.get_encrypted_datetime()
-        token = TokenService.get_activation_token(user, encrypted_datatime)
+        encrypted_datetime = DatetimeService.get_encrypted_datetime()
+        token = TokenService.get_activation_token(user, encrypted_datetime)
         content = cls.__get_content_for_email(request, user, token,
-                                              encrypted_datatime)
+                                              encrypted_datetime)
         ready_email = cls.__get_ready_activation_email(content, user)
         ready_email.send()
 
@@ -38,9 +38,11 @@ class EmailService:
         Send email to new user email address
         for further confirmation his email
         """
-        token = TokenService.get_email_confirmation_token(user, new_user_email)
-        content = cls.__get_content_for_email(request, user, token)
-
+        encrypted_datetime = DatetimeService.get_encrypted_datetime()
+        token = TokenService.get_email_confirmation_token(user, encrypted_datetime,
+                                                          new_user_email)
+        content = cls.__get_content_for_email(request, user,
+                                              token, encrypted_datetime)
         ready_email = cls.__get_ready_email_for_confirm_changing(
             content, new_user_email)
 
@@ -59,13 +61,13 @@ class EmailService:
 
     @classmethod
     def __get_content_for_email(cls, request, user: User, token: str,
-                                encrypted_datatime: str) -> tuple:
+                                encrypted_datetime: str) -> tuple:
         """Forms content for email latter."""
         current_site = get_current_site(request)
         content = {
             'user': user,
             'id': user.id,
-            'encrypted_datatime': encrypted_datatime,
+            'encrypted_datetime': encrypted_datetime,
             'token': token,
             'domain': current_site.domain
         }

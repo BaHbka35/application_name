@@ -13,11 +13,11 @@ def registrate_user(self, signup_data: dict):
 
 def activate_user(self, user):
     """Activate user"""
-    encrypted_datatime = DatetimeService.get_encrypted_datetime()
-    activation_token = TokenService.get_activation_token(user, encrypted_datatime)
+    encrypted_datetime = DatetimeService.get_encrypted_datetime()
+    activation_token = TokenService.get_activation_token(user, encrypted_datetime)
     url = reverse('users:activate_account',
                   kwargs={'id': user.id,
-                          'encrypted_datatime': encrypted_datatime,
+                          'encrypted_datetime': encrypted_datetime,
                           'token': activation_token
                           }
                   )

@@ -39,7 +39,7 @@ class SignUpView(APIView):
 class AccountActivationView(APIView):
     """View for activate user account."""
 
-    def get(self, request, id: int, encrypted_datatime: str, token: str) -> Response:
+    def get(self, request, id: int, encrypted_datetime: str, token: str) -> Response:
         """Activate user."""
         try:
             user = User.objects.get(id=id)
@@ -47,10 +47,10 @@ class AccountActivationView(APIView):
             data = {"message": "Activation account is failed."}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
-        if not DatetimeService.check_encrypted_datetime(encrypted_datatime):
+        if not DatetimeService.check_encrypted_datetime(encrypted_datetime):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        if TokenService.check_activation_token(user, encrypted_datatime, token):
+        if TokenService.check_activation_token(user, encrypted_datetime, token):
             UserService.activate_user(user)
             return Response(status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -167,7 +167,7 @@ class UserChangeEmailView(APIView):
 
     permission_classes = [IsAuthenticated]
 
-    def put(self, request):
+    def put(self, request) -> Response:
         """
         Writes new user email in not confirmed emails and
         sends message to new user email for confirmation email.
@@ -185,14 +185,13 @@ class UserChangeEmailView(APIView):
 class EmailConfirmationView(APIView):
     """Class for confirmation changing email."""
 
-    def get(self, request, id, token):
+    def get(self, request, id: int, encrypted_datetime: str, token: str) -> Response:
         """Checks that given token is right and changes user email."""
         user = User.objects.get(id=id)
         not_confirmed_email = NotConfirmedEmail.objects.get(user=user)
         new_user_email = not_confirmed_email.email
         if TokenService.check_email_confirmation_token(
-                token, user, new_user_email):
-
+                user, encrypted_datetime, token,  new_user_email):
             user.email = new_user_email
             user.save()
             not_confirmed_email.delete()

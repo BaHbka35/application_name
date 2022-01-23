@@ -17,7 +17,6 @@ class DatetimeService:
     @classmethod
     def get_encrypted_datetime(cls) -> str:
 
-
         datetime_obj_now = datetime.datetime.now()
         datetime_str_now = datetime_obj_now.strftime("%Y-%m-%d %H:%M:%S")
 
