@@ -6,9 +6,10 @@ from users.models import User
 class Challenge(models.Model):
     """Challenge model"""
 
-    name = models.CharField(max_length=200, verbose_name='challenge name')
+    name = models.CharField(max_length=200, unique=True,
+                            verbose_name='challenge name')
 
-    slug = models.SlugField(max_length=200, verbose_name='slug')
+    slug = models.SlugField(max_length=200, unique=True, verbose_name='slug')
 
     creator = models.ForeignKey(User, on_delete=models.CASCADE,
                                 verbose_name='challenge creator')
@@ -45,21 +46,26 @@ class Challenge(models.Model):
 
 
 class ChallengeMember(models.Model):
-    """"""
+    """User that accept challenge."""
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE,
+                             verbose_name='user')
+    challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE,
+                                  verbose_name='challenge')
 
     def __str__(self):
-        return f'member "{self.user.username}" of challenge "{self.challenge.name}"'
+        return self.user.username
 
 
 class ChallegeWinner(models.Model):
-    """"""
+    """User that wone challenge."""
 
-    challenge_member = models.ForeignKey(ChallengeMember,
-                                         on_delete=models.CASCADE)
-    challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE)
+    challenge_member = models.ForeignKey(
+        ChallengeMember, on_delete=models.CASCADE,
+        verbose_name='challenge member')
+
+    challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE,
+                                  verbose_name='challenge')
 
     def __str__(self):
         return f'winner "{self.challenge_member.user.username}" \
@@ -67,11 +73,14 @@ class ChallegeWinner(models.Model):
 
 
 class ChallengeAnswer(models.Model):
-    """"""
+    """Video answer on challenge."""
 
-    challenge_member = models.ForeignKey(ChallengeMember,
-                                         on_delete=models.CASCADE)
-    challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE)
+    challenge_member = models.ForeignKey(
+        ChallengeMember, on_delete=models.CASCADE,
+        verbose_name='challenge member')
+
+    challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE,
+                                  verbose_name='challenge')
 
     video_answer = models.FileField(upload_to='video_answer',
                                     verbose_name='video answer on chellange',)

@@ -14,18 +14,18 @@ class ChallengeAdmin(admin.ModelAdmin):
 
 
 @admin.register(ChallengeMember)
-class ChallengeAdmin(admin.ModelAdmin):
+class ChallengeMemberAdmin(admin.ModelAdmin):
     """Setting for challenge member admin page."""
-    pass
+    list_display = ('user', 'challenge',)
 
 
 @admin.register(ChallegeWinner)
-class ChallengeAdmin(admin.ModelAdmin):
+class ChallengeWinnerAdmin(admin.ModelAdmin):
     """Setting for challenge winner admin page."""
-    pass
+    list_display = ('challenge_member', 'challenge',)
 
 
 @admin.register(ChallengeAnswer)
-class ChallengeAdmin(admin.ModelAdmin):
+class ChallengeAnserAdmin(admin.ModelAdmin):
     """Setting for challenge answer admin page."""
-    pass
+    list_display = ('challenge_member', 'challenge',)
