@@ -24,3 +24,10 @@ urlpatterns = [
     path('email_confirmation/<int:id>/<str:encrypted_datetime>/<str:token>/',
          views.EmailConfirmationView.as_view(), name='email_confirmation'),
 ]
+
+
+
+
+
+
+
