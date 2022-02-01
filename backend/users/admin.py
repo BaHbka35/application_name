@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import User
+from .models import User, NotConfirmedEmail
 
 
 @admin.register(User)
@@ -15,3 +15,8 @@ class UserAdmin(admin.ModelAdmin):
     list_filter = ('is_activated', 'is_superuser')
     search_fields = ('first_name', 'surname', 'username', 'email')
     ordering = ('first_name', 'surname', 'username', 'email')
+
+
+@admin.register(NotConfirmedEmail)
+class NotConfirmedEmailAdmin(admin.ModelAdmin):
+    list_display = ('user', 'email',)
