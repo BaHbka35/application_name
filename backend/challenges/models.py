@@ -34,7 +34,7 @@ class Challenge(models.Model):
                                      blank=True, null=True)
 
     bet = models.PositiveIntegerField(
-        verbose_name='amount coins for accept challenge')
+        default=0, verbose_name='amount coins for accept challenge')
 
     total_bets_sum = models.PositiveIntegerField(
         verbose_name='total sum of all bets for this challenge', default=0)
