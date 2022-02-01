@@ -180,10 +180,23 @@ class UserChangeEmailView(APIView):
         serializer.is_valid(raise_exception=True)
         user = request.user
         new_user_email = serializer.data['new_user_email']
-        NotConfirmedEmail(user=user, email=new_user_email).save()
+
+        self.__add_email_to_not_confirmed(user, new_user_email)
+
         EmailService.send_email_for_confirm_changing_email(
             request, user, new_user_email)
         return Response(status=status.HTTP_200_OK)
+
+    def __add_email_to_not_confirmed(self, user: User, new_user_email: str) -> None:
+        """Add email to not confirmed"""
+        try:
+            obj = NotConfirmedEmail.objects.get(user=user)
+        except NotConfirmedEmail.DoesNotExist:
+            obj = None
+
+        if obj:
+            obj.delete()
+        NotConfirmedEmail(user=user, email=new_user_email).save()
 
 
 class EmailConfirmationView(APIView):
