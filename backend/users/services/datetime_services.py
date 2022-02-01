@@ -40,4 +40,4 @@ class DatetimeService:
         datatime_now = datetime.datetime.now()
         time_difference = datatime_now - datetimeobj
 
-        return not time_difference.total_seconds() > 9438535
+        return not time_difference.total_seconds() > 60 * 60 * 24
