@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 
 from users.models import User
-from .for_tests import registrate_user, activate_user
+from services_for_tests.for_tests import registrate_user, activate_user
 
 
 signup_data = {

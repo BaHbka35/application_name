@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 
 from users.models import User
-from .for_tests import registrate_user, activate_user, login_user, get_auth_headers, set_auth_headers
+from services_for_tests.for_tests import registrate_user, activate_user, login_user, get_auth_headers, set_auth_headers
 
 signup_data = {
     'first_name': 'Sasha',
@@ -46,8 +46,7 @@ class ChangePasswordTests(APITestCase):
         """
         token, signature = get_auth_headers(self, login_data)
         set_auth_headers(self, token, signature)
-        response = self.client.put(self.url, data=self.data,
-                                   format='json')
+        response = self.client.put(self.url, data=self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.__check_that_password_was_changed_successfully()
         self.__check_successfully_login_with_new_password(token)
