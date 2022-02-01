@@ -174,16 +174,29 @@ class UserChangeEmailView(APIView):
     def put(self, request) -> Response:
         """
         Writes new user email in not confirmed emails and
-        sends message to new user email for confirmation email.
+        sends message to new user email with comfirmation link.
         """
         serializer = ChangeUserEmailSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = request.user
         new_user_email = serializer.data['new_user_email']
-        NotConfirmedEmail(user=user, email=new_user_email).save()
+
+        self.__add_email_to_not_confirmed(user, new_user_email)
+
         EmailService.send_email_for_confirm_changing_email(
             request, user, new_user_email)
         return Response(status=status.HTTP_200_OK)
+
+    def __add_email_to_not_confirmed(self, user: User, new_user_email: str) -> None:
+        """Add email to not confirmed"""
+        try:
+            obj = NotConfirmedEmail.objects.get(user=user)
+        except NotConfirmedEmail.DoesNotExist:
+            obj = None
+
+        if obj:
+            obj.delete()
+        NotConfirmedEmail(user=user, email=new_user_email).save()
 
 
 class EmailConfirmationView(APIView):
@@ -194,6 +207,11 @@ class EmailConfirmationView(APIView):
         user = User.objects.get(id=id)
         not_confirmed_email = NotConfirmedEmail.objects.get(user=user)
         new_user_email = not_confirmed_email.email
+
+        if not DatetimeService.check_encrypted_datetime(encrypted_datetime):
+            data = {'message': 'Lifetime of token is finished.'}
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
         if TokenService.check_email_confirmation_token(
                 user, encrypted_datetime, token,  new_user_email):
             user.email = new_user_email
@@ -201,3 +219,12 @@ class EmailConfirmationView(APIView):
             not_confirmed_email.delete()
             return Response(status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
+
+
+
