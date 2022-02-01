@@ -2,6 +2,6 @@
 
 Hi, {{ user.username }} click on link for confirm new email.
 
-http://{{ domain }}{% url 'users:email_confirmation' id token %}
+http://{{ domain }}{% url 'users:email_confirmation' id encrypted_datetime token %}
 
 {% endblock content %}

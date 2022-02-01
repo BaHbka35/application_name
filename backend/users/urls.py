@@ -6,7 +6,7 @@ app_name = 'users'
 
 urlpatterns = [
     path('signup/', views.SignUpView.as_view(), name='signup'),
-    path('activate_account/<int:id>/<str:token>/',
+    path('activate_account/<int:id>/<str:encrypted_datetime>/<str:token>/',
          views.AccountActivationView.as_view(),
          name='activate_account'),
     path('login/', views.LogInView.as_view(), name='login'),
@@ -21,6 +21,6 @@ urlpatterns = [
     path('users_list/', views.UsersListView.as_view(), name='users_list'),
     path('change_user_email/', views.UserChangeEmailView.as_view(),
          name='change_user_email'),
-    path('email_confirmation/<int:id>/<str:token>/',
+    path('email_confirmation/<int:id>/<str:encrypted_datetime>/<str:token>/',
          views.EmailConfirmationView.as_view(), name='email_confirmation'),
 ]
