@@ -39,7 +39,8 @@ class Challenge(models.Model):
     total_bets_sum = models.PositiveIntegerField(
         verbose_name='total sum of all bets for this challenge', default=0)
 
-    is_active = models.BooleanField(verbose_name='is challenge active')
+    is_active = models.BooleanField(verbose_name='is challenge active',
+                                    default=True)
 
     def __str__(self):
         return self.name

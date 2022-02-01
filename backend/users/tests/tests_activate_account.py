@@ -6,7 +6,7 @@ from rest_framework import status
 from users.models import User
 from users.services.token_services import TokenService
 from users.services.datetime_services import DatetimeService
-from .for_tests import ForTestsDateTimeService
+from services_for_tests.for_tests import ForTestsDateTimeService
 
 
 class AccountActivationAPITests(APITestCase):

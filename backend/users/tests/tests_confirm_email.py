@@ -6,8 +6,8 @@ from rest_framework import status
 from users.models import User, NotConfirmedEmail
 from users.services.token_services import TokenService
 from users.services.datetime_services import DatetimeService
-from .for_tests import registrate_user, activate_user, get_auth_headers,\
-                       set_auth_headers, ForTestsDateTimeService
+from services_for_tests.for_tests import registrate_user, activate_user, get_auth_headers,\
+                                         set_auth_headers, ForTestsDateTimeService
 
 
 signup_data = {
