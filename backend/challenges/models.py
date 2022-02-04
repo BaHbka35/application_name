@@ -6,18 +6,17 @@ from users.models import User
 class Challenge(models.Model):
     """Challenge model"""
 
-    name = models.CharField(max_length=200, unique=True,
-                            verbose_name='challenge name')
+    name = models.CharField(max_length=200, verbose_name='challenge name')
 
     slug = models.SlugField(max_length=200, unique=True, verbose_name='slug')
 
     creator = models.ForeignKey(User, on_delete=models.CASCADE,
                                 verbose_name='challenge creator')
 
-    date_start = models.DateTimeField(
+    start_datetime = models.DateTimeField(
         auto_now_add=True, verbose_name='date when challenge starts')
 
-    date_finish = models.DateTimeField(
+    finish_datetime = models.DateTimeField(
         verbose_name='date when challenge finishes')
 
     goal = models.CharField(max_length=200, verbose_name='what must be done')

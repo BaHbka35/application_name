@@ -1,23 +1,27 @@
 import datetime
 
+from django.db.utils import IntegrityError
+
 from challenges.models import Challenge
+from users.models import User
 
 
 class ChallengeService:
     """Class which contain all logic belongs to challenge"""
 
     @staticmethod
-    def create_challenge(data, user):
+    def create_challenge(data: dict, user: User) -> None:
         """Creates challenge"""
-        data['date_finish'] = datetime.datetime.strptime(data['date_finish'],
-                                                         '%Y-%m-%d %H:%M:%S')
-        Challenge(
-            name=data['name'],
-            slug=data['name'],
+
+        challenge_name = data['name']
+        challenge = Challenge(
+            name=challenge_name,
+            slug=f'{user.id}_{challenge_name}',
             creator=user,
-            date_finish=data['date_finish'],
+            finish_datetime=data['finish_datetime'],
             goal=data['goal'],
             description=data['description'],
             requirements=data['requirements'],
             bet=data['bet'],
-        ).save()
+        )
+        challenge.save()

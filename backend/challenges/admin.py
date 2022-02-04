@@ -6,8 +6,9 @@ from .models import Challenge, ChallengeMember, ChallegeWinner, ChallengeAnswer
 class ChallengeAdmin(admin.ModelAdmin):
     """Setting for challenge admin page."""
 
-    list_display = ('name', 'creator', 'date_finish', 'bet', 'total_bets_sum',)
-    readonly_fields = ('date_start', 'total_bets_sum',)
+    list_display = ('name', 'creator', 'finish_datetime',
+                    'bet', 'total_bets_sum',)
+    readonly_fields = ('start_datetime', 'total_bets_sum',)
     prepopulated_fields = {'slug': ('name',)}
     list_filter = ('creator', 'bet',)
     search_fields = ('name', 'creator__username',)
