@@ -24,8 +24,9 @@ class CreateChallengeView(APIView):
         serializer.is_valid(raise_exception=True)
         user = request.user
 
-        if self.__does_current_user_have_challenge_with_same_name(
-                user, serializer.data['name']):
+        current_user_challenge_with_same_name = Challenge.objects.all().filter(
+            creator=user, name=serializer.data['name'])
+        if current_user_challenge_with_same_name:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -34,13 +35,3 @@ class CreateChallengeView(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         return Response(status=status.HTTP_200_OK)
-
-    def __does_current_user_have_challenge_with_same_name(
-            self, user: User, challenge_name: str) -> bool:
-        """
-        Checks does current user already have
-        challenge with same challenge name.
-        """
-        challenge = Challenge.objects.all().filter(creator=user,
-                                                   name=challenge_name)
-        return True if challenge else False
