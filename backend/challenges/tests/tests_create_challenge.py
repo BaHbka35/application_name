@@ -150,6 +150,17 @@ class CreateChallengeTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(Challenge.objects.count(), 0)
 
+    def test_creating_free_challenge(self):
+        """Tests creating free challenge(bet=0)."""
+        data = self.data.copy()
+        data['bet'] = 0
+        token, signature = get_auth_headers(self, login_data)
+        set_auth_headers(self, token, signature)
+        response = self.client.post(self.url, data=data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(Challenge.objects.count(), 1)
+
+
 
 
 
