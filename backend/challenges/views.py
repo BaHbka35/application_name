@@ -47,29 +47,42 @@ class UploadVideoExampleView(APIView):
     permitions = [IsAuthenticated]
 
     def put(self, request, challenge_id: int) -> Response:
-        """"""
-        if 'video_example' not in request.data:
-            if not request.data['video_example']:
-                data={'message': 'there isn\' video file.'},
-                return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+        """Set video example for challenge."""
+        if not self.__validate_video_file(request.data):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        if not request.data['video_example'].temporary_file_path()[-3:] == 'mp4':
-            data={'message': 'video format not mp4'}
-            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-
+        video_example_file = request.data['video_example']
         user = request.user
-
         challenge = Challenge.objects.get(id=challenge_id)
-        file_name = f'{user.id}_{challenge.id}.mp4'
-        if challenge.video_example:
-            os.remove(os.path.join(settings.MEDIA_ROOT, f'video_examples/{file_name}'))
-        file_name = f'{user.id}_{challenge.id}.mp4'
-        challenge.video_example = request.data['video_example']
-        challenge.video_example.name = file_name
-        challenge.save()
+
+        self.__update_video_exemple(user, challenge, video_example_file)
 
         return Response(status=status.HTTP_200_OK)
 
+    def __validate_video_file(self, data):
+        """Validates video file."""
+        if 'video_example' not in data:
+            return False
+        if not data['video_example']:
+            return False
+        if not data['video_example'].temporary_file_path()[-3:] == 'mp4':
+            return False
+        return True
+
+    def __update_video_exemple(self, user: User, challenge: Challenge,
+                               video_example_file: '') -> Challenge:
+        """Updates video example for challenge."""
+        file_name = f'{user.id}_{challenge.id}.mp4'
+        if challenge.video_example:
+            try:
+                os.remove(os.path.join(settings.MEDIA_ROOT, f'video_examples/{file_name}'))
+            except FileNotFoundError:
+                pass
+
+        challenge.video_example = video_example_file
+        challenge.video_example.name = file_name
+        challenge.save()
+        return challenge
 
 
 
