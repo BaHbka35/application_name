@@ -10,7 +10,7 @@ class ChallengeService:
     """Class which contain all logic belongs to challenge"""
 
     @staticmethod
-    def create_challenge(data: dict, user: User) -> None:
+    def create_challenge(data: dict, user: User) -> Challenge:
         """Creates challenge"""
 
         challenge_name = data['name']
@@ -25,3 +25,4 @@ class ChallengeService:
             bet=data['bet'],
         )
         challenge.save()
+        return challenge

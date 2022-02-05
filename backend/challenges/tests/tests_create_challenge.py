@@ -1,7 +1,6 @@
 import datetime
 
 from django.urls import reverse
-from django.db import transaction
 
 from rest_framework.test import APITestCase
 from rest_framework import status
