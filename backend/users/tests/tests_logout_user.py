@@ -30,13 +30,12 @@ class LogOutAPITests(APITestCase):
     def setUp(self):
         """Registrate, activate user."""
         registrate_and_activate_user(signup_data)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
 
     def test_logout_user(self):
         """Tests log user out."""
-        auth_headers = get_auth_headers(login_data)
-        set_auth_headers(self, auth_headers)
         response = self.client.get(self.url)
-
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         user = User.objects.get()
         with self.assertRaises(Token.DoesNotExist):
@@ -44,6 +43,7 @@ class LogOutAPITests(APITestCase):
 
     def test_logout_not_authenticated_user(self):
         """Tests try to log somebody out."""
+        self.client.credentials()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 

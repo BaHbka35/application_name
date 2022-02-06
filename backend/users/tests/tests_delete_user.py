@@ -29,11 +29,11 @@ class DeleteUserAccountTests(APITestCase):
     def setUp(self):
         """Registrate, activate user."""
         registrate_and_activate_user(signup_data)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
 
     def test_delete_user(self):
         """Check that user was deleted successfully."""
-        auth_headers = get_auth_headers(login_data)
-        set_auth_headers(self, auth_headers)
         response = self.client.delete(self.url, format='json')
 
         users_amount = User.objects.all().count()

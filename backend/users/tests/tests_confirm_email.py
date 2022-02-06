@@ -43,6 +43,8 @@ class EmailConfirmationTests(APITestCase):
         self.client.put(changing_email_url, data=changing_email_data,
                         format='json')
 
+        self.client.credentials()
+
 
     def test_confirm_user_email(self):
         """

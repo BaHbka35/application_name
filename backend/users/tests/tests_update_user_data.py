@@ -39,20 +39,20 @@ class UpdateUserDataAPITests(APITestCase):
     def setUp(self):
         """Registrate, activate user."""
         registrate_and_activate_user(signup_data)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
 
     def test_update_user_date_without_login(self):
         """Tests update user date without login."""
+        self.client.credentials()
         response = self.client.put(self.url, data=self.updating_data,
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_update_user_data_with_right_data(self):
         """Tests correct updating user data with right data"""
-        auth_headers = get_auth_headers(login_data)
-        set_auth_headers(self, auth_headers)
         response = self.client.put(self.url, data=self.updating_data,
                                    format='json')
-
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.__check_response_data(response)
         self.__check_changes_in_user_data()
@@ -81,12 +81,7 @@ class UpdateUserDataAPITests(APITestCase):
         """Tests update user data with negative training experience."""
         data = self.updating_data.copy()
         data['training_experience'] = -4.5
-
-        auth_headers = get_auth_headers(login_data)
-        set_auth_headers(self, auth_headers)
-
         response = self.client.put(self.url, data=data, format='json')
-
         user = User.objects.get()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(user.training_experience, None)
@@ -95,11 +90,7 @@ class UpdateUserDataAPITests(APITestCase):
         """Tests update user data with negative age."""
         data = self.updating_data.copy()
         data['age'] = -19
-
-        auth_headers = get_auth_headers(login_data)
-        set_auth_headers(self, auth_headers)
         response = self.client.put(self.url, data=data, format='json')
-
         user = User.objects.get()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(user.age, None)
@@ -111,11 +102,7 @@ class UpdateUserDataAPITests(APITestCase):
         """
         data = self.updating_data.copy()
         data['first_name'] = 'laa342:234111'
-
-        auth_headers = get_auth_headers(login_data)
-        set_auth_headers(self, auth_headers)
         response = self.client.put(self.url, data=data, format='json')
-
         user = User.objects.get()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(user.first_name, 'Sasha')
@@ -124,11 +111,7 @@ class UpdateUserDataAPITests(APITestCase):
         """Tests update user data with surname than contains 'bad' symbols."""
         data = self.updating_data.copy()
         data['surname'] = 'laa342:234111'
-
-        auth_headers = get_auth_headers(login_data)
-        set_auth_headers(self, auth_headers)
         response = self.client.put(self.url, data=data, format='json')
-
         user = User.objects.get()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(user.surname, 'Kurkin')
@@ -137,11 +120,7 @@ class UpdateUserDataAPITests(APITestCase):
         """Tests update user data with not existing gender."""
         data = self.updating_data.copy()
         data['gender'] = 'wrong'
-
-        auth_headers = get_auth_headers(login_data)
-        set_auth_headers(self, auth_headers)
         response = self.client.put(self.url, data=data, format='json')
-
         user = User.objects.get()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(user.gender, None)
@@ -150,12 +129,18 @@ class UpdateUserDataAPITests(APITestCase):
         """Tests update user data with existing gender."""
         data = self.updating_data.copy()
         data['gender'] = 'female'
-
-        auth_headers = get_auth_headers(login_data)
-        set_auth_headers(self, auth_headers)
         response = self.client.put(self.url, data=data, format='json')
-
         user = User.objects.get()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(user.gender, 'female')
         self.assertEqual(response.data['gender'], 'female')
+
+
+
+
+
+
+
+
+
+

@@ -34,6 +34,9 @@ class ChangePasswordTests(APITestCase):
     def setUp(self):
         """Registrate, activate user."""
         registrate_and_activate_user(signup_data)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
+        self.auth_headers = auth_headers
 
     def test_change_password(self):
         """
@@ -41,12 +44,10 @@ class ChangePasswordTests(APITestCase):
         Checks that password was changed, auth token was deleted.
         Checks that users can log in with new password.
         """
-        auth_headers = get_auth_headers(login_data)
-        set_auth_headers(self, auth_headers)
         response = self.client.put(self.url, data=self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.__check_that_password_was_changed_successfully()
-        self.__check_successfully_login_with_new_password(auth_headers['token'])
+        self.__check_successfully_login_with_new_password(self.auth_headers['token'])
 
     def __check_that_password_was_changed_successfully(self):
         """
@@ -85,8 +86,6 @@ class ChangePasswordTests(APITestCase):
             'new_password2': 'second_password'
             }
 
-        auth_headers = get_auth_headers(login_data)
-        set_auth_headers(self, auth_headers)
         response = self.client.put(self.url, data=data,
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -107,10 +106,6 @@ class ChangePasswordTests(APITestCase):
             'new_password': 'first_password',
             'new_password2': 'short',
             }
-
-        auth_headers = get_auth_headers(login_data)
-        set_auth_headers(self, auth_headers)
-
         response = self.client.put(self.url, data=data,
                                    format='json')
         response2 = self.client.put(self.url, data=data2,
