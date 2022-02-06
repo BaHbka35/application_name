@@ -30,6 +30,7 @@ class SignUpView(APIView):
         serializer.is_valid(raise_exception=True)
         user = User.objects.create_user(**serializer.data)
         EmailService.send_email_for_activate_account(request, user)
+
         data = serializer.data
         data["message"] = "Check your email for activate account."
         del data['password']
@@ -72,19 +73,20 @@ class LogInView(APIView):
         with token for further authentication.
         """
         serializer = LogInSerializer(data=request.data)
-        if serializer.is_valid():
-            user = self.__get_authenticated_user(serializer.data)
-            if not user:
-                data = {"message": "Username or password incorrect."}
-                return Response(data=data,
-                                status=status.HTTP_400_BAD_REQUEST)
-            if user.is_activated:
-                token = TokenService.get_user_auth_token(user)
-                signature = TokenSignatureService.get_signature(token)
-                data = {'token': token, 'signature': signature}
-                return Response(data=data, status=status.HTTP_200_OK)
-
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        user = self.__get_authenticated_user(serializer.data)
+        if not user:
+            data = {'message': 'Username or password incorrect.'}
+            return Response(data=data,
+                            status=status.HTTP_400_BAD_REQUEST)
+        if not user.is_activated:
+            data = {'message': 'User is not activated'}
+            return Response(data=data,
+                            status=status.HTTP_400_BAD_REQUEST)
+        token = TokenService.get_user_auth_token(user)
+        signature = TokenSignatureService.get_signature(token)
+        data = {'token': token, 'signature': signature}
+        return Response(data=data, status=status.HTTP_200_OK)
 
     def __get_authenticated_user(self, data: dict) -> Optional[User]:
         """Authenticate user and return user or None."""

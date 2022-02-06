@@ -6,7 +6,7 @@ from rest_framework import status
 from users.models import User, NotConfirmedEmail
 from users.services.token_services import TokenService
 from users.services.datetime_services import DatetimeService
-from services_for_tests.for_tests import registrate_user, activate_user, get_auth_headers,\
+from services_for_tests.for_tests import registrate_and_activate_user, get_auth_headers,\
                                          set_auth_headers, ForTestsDateTimeService
 
 
@@ -16,7 +16,6 @@ signup_data = {
     'username': 'Luk',
     'email': 'nepetr86@bk.ru',
     'password': '123456789',
-    'password2': '123456789'
 }
 
 login_data = {
@@ -32,19 +31,19 @@ class EmailConfirmationTests(APITestCase):
 
     def setUp(self):
         """Registrate, activate, login, and change user email."""
-        response = registrate_user(self, signup_data)
-        self.user = User.objects.get(username=response.data['username'])
-        activate_user(self, self.user)
+        self.user = registrate_and_activate_user(signup_data)
 
         changing_email_data = {
             'new_user_email': 'tochno_ne_danil@mail.ru'
         }
         changing_email_url = reverse('users:change_user_email')
 
-        token, signature = get_auth_headers(self, login_data)
-        set_auth_headers(self, token, signature)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
         self.client.put(changing_email_url, data=changing_email_data,
                         format='json')
+
+        self.client.credentials()
 
 
     def test_confirm_user_email(self):

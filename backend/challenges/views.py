@@ -10,9 +10,9 @@ from .services.challenge_services import ChallengeService
 
 
 class CreateChallengeView(APIView):
-    """View for creating challange."""
+    """View for creating challenge."""
 
-    permitions = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request) -> Response:
         """Creates challenge."""
@@ -20,9 +20,9 @@ class CreateChallengeView(APIView):
         serializer.is_valid(raise_exception=True)
         user = request.user
 
-        current_user_challenge_with_same_name = Challenge.objects.all().filter(
+        is_current_user_challenge_with_same_name = Challenge.objects.all().filter(
             creator=user, name=serializer.data['name'])
-        if current_user_challenge_with_same_name:
+        if is_current_user_challenge_with_same_name:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -37,20 +37,17 @@ class UploadVideoExampleView(APIView):
     """View for upload video example for challenge."""
 
     parser_class = [FileUploadParser]
-    permitions = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def put(self, request, challenge_id: int) -> Response:
         """Set video example for challenge."""
         if not ChallengeService.is_video_example_file_valid(request.data):
             return Response(status=status.HTTP_400_BAD_REQUEST)
-
         video_example_file = request.data['video_example']
         user = request.user
         challenge = Challenge.objects.get(id=challenge_id)
-
         ChallengeService.update_video_example(user, challenge,
-                                                video_example_file)
-
+                                              video_example_file)
         return Response(status=status.HTTP_200_OK)
 
 
