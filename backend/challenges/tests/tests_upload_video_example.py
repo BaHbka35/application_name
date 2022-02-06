@@ -10,7 +10,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from services_for_tests.for_tests import registrate_and_activate_user, \
-                                         login_user, get_auth_headers, \
+                                         get_auth_headers, \
                                          set_auth_headers
 from challenges.services.challenge_services import ChallengeService
 
@@ -67,8 +67,8 @@ class UploadVideoExampleTests(APITestCase):
 
     def test_upload_video_correct(self):
         """Tests uploading video when all is good."""
-        token, signature = get_auth_headers(self, login_data)
-        set_auth_headers(self, token, signature)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
         response = self.client.put(self.url, data=self.data,
                                    format='multipart')
         amount_files_in_dir = os.listdir(self.storage_dirrectory)
@@ -77,8 +77,8 @@ class UploadVideoExampleTests(APITestCase):
 
     def test_upload_video_when_challenge_already_has_video_example(self):
         """Tests uploading video when challenge already has video example."""
-        token, signature = get_auth_headers(self, login_data)
-        set_auth_headers(self, token, signature)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
         response = self.client.put(self.url, data=self.data,
                                    format='multipart')
         response2 = self.client.put(self.url, data=self.data,
@@ -90,8 +90,8 @@ class UploadVideoExampleTests(APITestCase):
 
     def test_send_empty_json(self):
         """Tests sending empty json file."""
-        token, signature = get_auth_headers(self, login_data)
-        set_auth_headers(self, token, signature)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
         data = {}
         response = self.client.put(self.url, data=data, format='multipart')
         amount_files_in_dir = os.listdir(self.storage_dirrectory)
@@ -100,8 +100,8 @@ class UploadVideoExampleTests(APITestCase):
 
     def test_send_json_without_video_file(self):
         """Tests sending json without video file."""
-        token, signature = get_auth_headers(self, login_data)
-        set_auth_headers(self, token, signature)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
         data = {'video_example': ''}
         response = self.client.put(self.url, data=data, format='multipart')
         amount_files_in_dir = os.listdir(self.storage_dirrectory)

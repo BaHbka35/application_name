@@ -2,10 +2,11 @@ from django.urls import reverse
 
 from rest_framework.test import APITestCase
 from rest_framework import status
-from rest_framework.authtoken.models import Token
 
 from users.models import User
 from services_for_tests.for_tests import registrate_and_activate_user, registrate_user
+from users.services.token_services import TokenService
+from users.services.token_signature_services import TokenSignatureService
 
 
 signup_data = {
@@ -32,12 +33,14 @@ class LogInAPITests(APITestCase):
             'password': '123456789'
         }
         response = self.client.post(self.url, data, format='json')
-        user = User.objects.get(username='Luk')
-        token = Token.objects.get(user=user).key
+        user = User.objects.get()
+        token = TokenService.get_user_auth_token(user)
+        signature = TokenSignatureService.get_signature(token)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual('token' in response.data, True)
         self.assertEqual(response.data['token'], token)
+        self.assertEqual(response.data['signature'], signature)
 
     def test_login_with_not_activate_account(self):
         """Tests login user with not activated account."""
@@ -72,16 +75,12 @@ class LogInAPITests(APITestCase):
 
     def test_login_without_username(self):
         """Tests login user without username."""
-        data = {
-            'password': '123456789'
-            }
+        data = {'password': '123456789'}
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_login_without_user_password(self):
         """Tests login user without user password."""
-        data = {
-            'username': 'Luk'
-            }
+        data = {'username': 'Luk'}
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

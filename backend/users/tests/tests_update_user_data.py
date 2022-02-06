@@ -48,8 +48,8 @@ class UpdateUserDataAPITests(APITestCase):
 
     def test_update_user_data_with_right_data(self):
         """Tests correct updating user data with right data"""
-        token, signature = get_auth_headers(self, login_data)
-        set_auth_headers(self, token, signature)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
         response = self.client.put(self.url, data=self.updating_data,
                                    format='json')
 
@@ -82,8 +82,8 @@ class UpdateUserDataAPITests(APITestCase):
         data = self.updating_data.copy()
         data['training_experience'] = -4.5
 
-        token, signature = get_auth_headers(self, login_data)
-        set_auth_headers(self, token, signature)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
 
         response = self.client.put(self.url, data=data, format='json')
 
@@ -96,8 +96,8 @@ class UpdateUserDataAPITests(APITestCase):
         data = self.updating_data.copy()
         data['age'] = -19
 
-        token, signature = get_auth_headers(self, login_data)
-        set_auth_headers(self, token, signature)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
         response = self.client.put(self.url, data=data, format='json')
 
         user = User.objects.get()
@@ -112,8 +112,8 @@ class UpdateUserDataAPITests(APITestCase):
         data = self.updating_data.copy()
         data['first_name'] = 'laa342:234111'
 
-        token, signature = get_auth_headers(self, login_data)
-        set_auth_headers(self, token, signature)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
         response = self.client.put(self.url, data=data, format='json')
 
         user = User.objects.get()
@@ -125,8 +125,8 @@ class UpdateUserDataAPITests(APITestCase):
         data = self.updating_data.copy()
         data['surname'] = 'laa342:234111'
 
-        token, signature = get_auth_headers(self, login_data)
-        set_auth_headers(self, token, signature)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
         response = self.client.put(self.url, data=data, format='json')
 
         user = User.objects.get()
@@ -138,8 +138,8 @@ class UpdateUserDataAPITests(APITestCase):
         data = self.updating_data.copy()
         data['gender'] = 'wrong'
 
-        token, signature = get_auth_headers(self, login_data)
-        set_auth_headers(self, token, signature)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
         response = self.client.put(self.url, data=data, format='json')
 
         user = User.objects.get()
@@ -151,8 +151,8 @@ class UpdateUserDataAPITests(APITestCase):
         data = self.updating_data.copy()
         data['gender'] = 'female'
 
-        token, signature = get_auth_headers(self, login_data)
-        set_auth_headers(self, token, signature)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
         response = self.client.put(self.url, data=data, format='json')
 
         user = User.objects.get()

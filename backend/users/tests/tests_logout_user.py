@@ -33,8 +33,8 @@ class LogOutAPITests(APITestCase):
 
     def test_logout_user(self):
         """Tests log user out."""
-        token, signature = get_auth_headers(self, login_data)
-        set_auth_headers(self, token, signature)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)

@@ -38,8 +38,8 @@ class EmailConfirmationTests(APITestCase):
         }
         changing_email_url = reverse('users:change_user_email')
 
-        token, signature = get_auth_headers(self, login_data)
-        set_auth_headers(self, token, signature)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
         self.client.put(changing_email_url, data=changing_email_data,
                         format='json')
 

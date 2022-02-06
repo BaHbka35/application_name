@@ -35,8 +35,8 @@ class ChangeUserEmailTests(APITestCase):
 
     def test_change_user_email_with_true_data(self):
         """Tests changing user email with true data"""
-        token, signature = get_auth_headers(self, login_data)
-        set_auth_headers(self, token, signature)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
         response = self.client.put(self.url, data=self.data,
                                    format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)

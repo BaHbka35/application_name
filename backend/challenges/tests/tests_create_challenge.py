@@ -8,7 +8,7 @@ from rest_framework import status
 from users.models import User
 from challenges.models import Challenge
 from services_for_tests.for_tests import registrate_and_activate_user, \
-                                         login_user, get_auth_headers, \
+                                         get_auth_headers, \
                                          set_auth_headers
 
 signup_data = {
@@ -63,8 +63,8 @@ class CreateChallengeTests(APITestCase):
 
     def test_create_challenge(self):
         """Tests creating user with required fields."""
-        token, signature = get_auth_headers(self, login_data)
-        set_auth_headers(self, token, signature)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
         response = self.client.post(self.url, data=self.data, format='json')
         challenge = Challenge.objects.get()
         user = User.objects.get()
@@ -74,8 +74,8 @@ class CreateChallengeTests(APITestCase):
 
     def test_same_user_create_two_challenges_with_same_name(self):
         """Tests creating challenge with same names by same user."""
-        token, signature = get_auth_headers(self, login_data)
-        set_auth_headers(self, token, signature)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
         response = self.client.post(self.url, data=self.data, format='json')
         response2 = self.client.post(self.url, data=self.data, format='json')
 
@@ -87,12 +87,12 @@ class CreateChallengeTests(APITestCase):
         """Tests creating challenge with same names by different users."""
         create_second_user(self)
 
-        token, signature = get_auth_headers(self, login_data)
-        set_auth_headers(self, token, signature)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
         response = self.client.post(self.url, data=self.data, format='json')
 
-        token2, signature2 = get_auth_headers(self, login_data2)
-        set_auth_headers(self, token2, signature2)
+        auth_headers2 = get_auth_headers(login_data2)
+        set_auth_headers(self, auth_headers2)
         response2 = self.client.post(self.url, data=self.data, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -106,8 +106,8 @@ class CreateChallengeTests(APITestCase):
         """
         data = self.data.copy()
         data['finish_datetime'] = '2022-02-lal 18:25:43'
-        token, signature = get_auth_headers(self, login_data)
-        set_auth_headers(self, token, signature)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
         response = self.client.post(self.url, data=data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(Challenge.objects.count(), 0)
@@ -116,8 +116,8 @@ class CreateChallengeTests(APITestCase):
         """Tests creating challenge when bet field contain letter."""
         data = self.data.copy()
         data['bet'] = '5o'
-        token, signature = get_auth_headers(self, login_data)
-        set_auth_headers(self, token, signature)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
         response = self.client.post(self.url, data=data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(Challenge.objects.count(), 0)
@@ -126,8 +126,8 @@ class CreateChallengeTests(APITestCase):
         """Tests creating challeng when bet_field is float number."""
         data = self.data.copy()
         data['bet'] = 50.5
-        token, signature = get_auth_headers(self, login_data)
-        set_auth_headers(self, token, signature)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
         response = self.client.post(self.url, data=data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(Challenge.objects.count(), 0)
@@ -137,8 +137,8 @@ class CreateChallengeTests(APITestCase):
         finish datetime < current datetime."""
         data = self.data.copy()
         data['finish_datetime'] = '2000-02-02 18:25:43'
-        token, signature = get_auth_headers(self, login_data)
-        set_auth_headers(self, token, signature)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
         response = self.client.post(self.url, data=data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(Challenge.objects.count(), 0)
@@ -147,8 +147,8 @@ class CreateChallengeTests(APITestCase):
         """Tests creating free challenge(bet=0)."""
         data = self.data.copy()
         data['bet'] = 0
-        token, signature = get_auth_headers(self, login_data)
-        set_auth_headers(self, token, signature)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
         response = self.client.post(self.url, data=data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Challenge.objects.count(), 1)

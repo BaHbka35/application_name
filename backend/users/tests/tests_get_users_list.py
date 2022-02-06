@@ -3,7 +3,6 @@ from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
 
-from users.models import User
 from services_for_tests.for_tests import registrate_and_activate_user, get_auth_headers, set_auth_headers
 
 
@@ -40,8 +39,8 @@ class UsersListAPITests(APITestCase):
 
     def test_get_user_list_with_one_user(self):
         """Tests getting list of users with only one user."""
-        token, signature = get_auth_headers(self, login_data)
-        set_auth_headers(self, token, signature)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
         response = self.client.get(self.url)
         data = response.data
         self.assertEqual(data, [
@@ -56,8 +55,8 @@ class UsersListAPITests(APITestCase):
         """Tests getting list of users with more than one user."""
         registrate_and_activate_user(signup_data2)
 
-        token, signature = get_auth_headers(self, login_data)
-        set_auth_headers(self, token, signature)
+        auth_headers = get_auth_headers(login_data)
+        set_auth_headers(self, auth_headers)
         response = self.client.get(self.url)
         data = response.data
         self.assertEqual(data, [
