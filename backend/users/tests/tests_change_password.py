@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 
 from users.models import User
-from services_for_tests.for_tests import registrate_user, activate_user, login_user, get_auth_headers, set_auth_headers
+from services_for_tests.for_tests import registrate_and_activate_user, login_user, get_auth_headers, set_auth_headers
 
 signup_data = {
     'first_name': 'Sasha',
@@ -13,7 +13,6 @@ signup_data = {
     'username': 'Luk',
     'email': 'nepetr86@bk.ru',
     'password': '123456789',
-    'password2': '123456789'
 }
 
 login_data = {
@@ -34,9 +33,7 @@ class ChangePasswordTests(APITestCase):
 
     def setUp(self):
         """Registrate, activate user."""
-        response = registrate_user(self, signup_data)
-        user = User.objects.get(username=response.data['username'])
-        activate_user(self, user)
+        registrate_and_activate_user(signup_data)
 
     def test_change_password(self):
         """

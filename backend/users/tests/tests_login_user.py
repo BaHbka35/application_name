@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 
 from users.models import User
-from services_for_tests.for_tests import registrate_user, activate_user
+from services_for_tests.for_tests import registrate_and_activate_user, registrate_user
 
 
 signup_data = {
@@ -14,7 +14,6 @@ signup_data = {
     'username': 'Luk',
     'email': 'nepetr86@bk.ru',
     'password': '123456789',
-    'password2': '123456789'
 }
 
 
@@ -24,9 +23,7 @@ class LogInAPITests(APITestCase):
     url = reverse('users:login')
 
     def setUp(self):
-        response = registrate_user(self, signup_data)
-        user = User.objects.get(username=response.data['username'])
-        activate_user(self, user)
+        registrate_and_activate_user(signup_data)
 
     def test_login_with_right_data(self):
         """Tests login user with right data."""
@@ -47,7 +44,7 @@ class LogInAPITests(APITestCase):
         signup_data_local = signup_data.copy()
         signup_data_local['email'] = 'test@gmial.com'
         signup_data_local['username'] = 'username'
-        registrate_user(self, signup_data)
+        registrate_user(signup_data_local)
         data = {
             'username': 'username',
             'password': '123456789'

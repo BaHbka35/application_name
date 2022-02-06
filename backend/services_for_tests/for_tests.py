@@ -2,29 +2,26 @@ import datetime
 
 from django.urls import reverse
 
-from users.services.token_services import TokenService
+from users.models import User
 from users.services.datetime_services import DatetimeService
 
 
-def registrate_user(self, signup_data: dict):
+def registrate_user(signup_data: dict):
     """Register user"""
-    url = reverse('users:signup')
-    response = self.client.post(url, signup_data, format='json')
-    return response
+    user = User.objects.create_user(**signup_data)
+    return user
 
 
-def activate_user(self, user):
+def activate_user(user):
     """Activate user"""
-    encrypted_datetime = DatetimeService.get_encrypted_datetime()
-    activation_token = TokenService.get_activation_token(user, encrypted_datetime)
-    url = reverse('users:activate_account',
-                  kwargs={'id': user.id,
-                          'encrypted_datetime': encrypted_datetime,
-                          'token': activation_token
-                          }
-                  )
-    response = self.client.get(url)
-    return response
+    user.is_activated = True
+    user.save()
+    return user
+
+def registrate_and_activate_user(signup_data: dict):
+    user = registrate_user(signup_data)
+    user = activate_user(user)
+    return user
 
 
 def login_user(self, login_data: dict):

@@ -15,7 +15,6 @@ signup_data = {
     'username': 'Luk',
     'email': 'nepetr86@bk.ru',
     'password': '123456789',
-    'password2': '123456789'
 }
 
 
@@ -24,7 +23,7 @@ class AccountActivationAPITests(APITestCase):
 
     def setUp(self):
         """Create user for testing activation his account."""
-        registrate_user(self, signup_data)
+        registrate_user(signup_data)
 
     def test_activate_account(self):
         """Tests account activation with true activation_token"""

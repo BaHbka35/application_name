@@ -7,7 +7,7 @@ from rest_framework import status
 
 from users.models import User
 from challenges.models import Challenge
-from services_for_tests.for_tests import registrate_user, activate_user, \
+from services_for_tests.for_tests import registrate_and_activate_user, \
                                          login_user, get_auth_headers, \
                                          set_auth_headers
 
@@ -17,7 +17,6 @@ signup_data = {
     'username': 'Luk',
     'email': 'nepetr86@bk.ru',
     'password': '123456789',
-    'password2': '123456789'
 }
 
 login_data = {
@@ -41,10 +40,7 @@ finish_datetime = finish_datetime.strftime('%Y-%m-%dT%H:%M:%S')
 
 
 def create_second_user(self,):
-
-    response = registrate_user(self, signup_data2)
-    user = User.objects.get(username=response.data['username'])
-    activate_user(self, user)
+    user = registrate_and_activate_user(signup_data2)
     return user
 
 
@@ -63,9 +59,7 @@ class CreateChallengeTests(APITestCase):
 
     def setUp(self):
         """Registrate, activate user."""
-        response = registrate_user(self, signup_data)
-        user = User.objects.get(username=response.data['username'])
-        activate_user(self, user)
+        registrate_and_activate_user(signup_data)
 
     def test_create_challenge(self):
         """Tests creating user with required fields."""
@@ -91,7 +85,7 @@ class CreateChallengeTests(APITestCase):
 
     def test_two_user_create_challenge_with_same_name(self):
         """Tests creating challenge with same names by different users."""
-        user2 = create_second_user(self)
+        create_second_user(self)
 
         token, signature = get_auth_headers(self, login_data)
         set_auth_headers(self, token, signature)
@@ -139,7 +133,7 @@ class CreateChallengeTests(APITestCase):
         self.assertEqual(Challenge.objects.count(), 0)
 
     def test_creating_challenge_with_not_right_finish_date(self):
-        """Tests creatin challenge when
+        """Tests creating challenge when
         finish datetime < current datetime."""
         data = self.data.copy()
         data['finish_datetime'] = '2000-02-02 18:25:43'
