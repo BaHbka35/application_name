@@ -31,6 +31,7 @@ INSTALLED_APPS = [
 
     # My apps.
     'users.apps.UsersConfig',
+    'challenges.apps.ChallengesConfig',
 ]
 
 MIDDLEWARE = [
@@ -100,7 +101,7 @@ TIME_ZONE = 'Asia/Novokuznetsk'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 STATIC_URL = 'static/'
@@ -129,3 +130,18 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = os.getenv('EMAIL_PORT')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+MEDIA_URL = '/media/'
+
+
+
+
+
+
+
+
+
+
+
