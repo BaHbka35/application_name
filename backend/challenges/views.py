@@ -1,9 +1,3 @@
-import datetime
-import os
-
-from django.contrib.auth import authenticate
-from django.conf import settings
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -11,7 +5,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import FileUploadParser
 
 from .models import Challenge
-from users.models import User
 from .serializers import CreateChallengeSerializer
 from .services.challenge_services import ChallengeService
 
@@ -48,41 +41,17 @@ class UploadVideoExampleView(APIView):
 
     def put(self, request, challenge_id: int) -> Response:
         """Set video example for challenge."""
-        if not self.__validate_video_file(request.data):
+        if not ChallengeService.is_video_example_file_valid(request.data):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         video_example_file = request.data['video_example']
         user = request.user
         challenge = Challenge.objects.get(id=challenge_id)
 
-        self.__update_video_exemple(user, challenge, video_example_file)
+        ChallengeService.update_video_example(user, challenge,
+                                                video_example_file)
 
         return Response(status=status.HTTP_200_OK)
-
-    def __validate_video_file(self, data):
-        """Validates video file."""
-        if 'video_example' not in data:
-            return False
-        if not data['video_example']:
-            return False
-        if not data['video_example'].temporary_file_path()[-3:] == 'mp4':
-            return False
-        return True
-
-    def __update_video_exemple(self, user: User, challenge: Challenge,
-                               video_example_file: '') -> Challenge:
-        """Updates video example for challenge."""
-        file_name = f'{user.id}_{challenge.id}.mp4'
-        if challenge.video_example:
-            try:
-                os.remove(os.path.join(settings.MEDIA_ROOT, f'video_examples/{file_name}'))
-            except FileNotFoundError:
-                pass
-
-        challenge.video_example = video_example_file
-        challenge.video_example.name = file_name
-        challenge.save()
-        return challenge
 
 
 

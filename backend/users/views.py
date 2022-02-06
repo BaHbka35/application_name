@@ -174,7 +174,7 @@ class UserChangeEmailView(APIView):
     def put(self, request) -> Response:
         """
         Writes new user email in not confirmed emails and
-        sends message to new user email with comfirmation link.
+        sends message to new user email with confirmation link.
         """
         serializer = ChangeUserEmailSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -188,7 +188,7 @@ class UserChangeEmailView(APIView):
         return Response(status=status.HTTP_200_OK)
 
     def __add_email_to_not_confirmed(self, user: User, new_user_email: str) -> None:
-        """Add email to not confirmed"""
+        """Add email to not confirmed list"""
         try:
             obj = NotConfirmedEmail.objects.get(user=user)
         except NotConfirmedEmail.DoesNotExist:

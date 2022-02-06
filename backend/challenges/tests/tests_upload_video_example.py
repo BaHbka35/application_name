@@ -65,7 +65,8 @@ class UploadVideoExampleTests(APITestCase):
         self.url = reverse('challenges:upload_video_example', kwargs=kwargs)
 
         file_path = os.path.join(settings.MEDIA_ROOT, 'video_source/111.mp4')
-        self.storage_dirrectory = os.path.join(settings.MEDIA_ROOT, 'video_examples/')
+        self.storage_dirrectory = os.path.join(settings.MEDIA_ROOT,
+                                               'video_examples/')
         video_for_test = SimpleUploadedFile(file_path, b'video')
 
         self.data = {'video_example': video_for_test,}
@@ -76,9 +77,43 @@ class UploadVideoExampleTests(APITestCase):
         set_auth_headers(self, token, signature)
         response = self.client.put(self.url, data=self.data,
                                    format='multipart')
-        lst = os.listdir(self.storage_dirrectory)
+        amout_files_in_dir = os.listdir(self.storage_dirrectory)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(lst), 1)
+        self.assertEqual(len(amout_files_in_dir), 1)
+
+    def test_upload_video_when_challenge_already_has_video_example(self):
+        """Tests uploading vidoe when challenge already has vidoe example."""
+        token, signature = get_auth_headers(self, login_data)
+        set_auth_headers(self, token, signature)
+        response = self.client.put(self.url, data=self.data,
+                                   format='multipart')
+        response2 = self.client.put(self.url, data=self.data,
+                                   format='multipart')
+        amout_files_in_dir = os.listdir(self.storage_dirrectory)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response2.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(amout_files_in_dir), 1)
+
+    def test_send_ematy_json(self):
+        """Tests sedning empty json file."""
+        token, signature = get_auth_headers(self, login_data)
+        set_auth_headers(self, token, signature)
+        data = {}
+        response = self.client.put(self.url, data=data, format='multipart')
+        amout_files_in_dir = os.listdir(self.storage_dirrectory)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(len(amout_files_in_dir), 0)
+
+    def test_send_json_without_video_file(self):
+        """Tests sending json without video file."""
+        token, signature = get_auth_headers(self, login_data)
+        set_auth_headers(self, token, signature)
+        data = {'video_example': '',}
+        response = self.client.put(self.url, data=data, format='multipart')
+        amout_files_in_dir = os.listdir(self.storage_dirrectory)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(len(amout_files_in_dir), 0)
+
 
 
 
