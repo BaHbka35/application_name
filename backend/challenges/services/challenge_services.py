@@ -1,6 +1,6 @@
-import datetime
+import os
 
-from django.db.utils import IntegrityError
+from django.conf import settings
 
 from challenges.models import Challenge
 from users.models import User
@@ -10,7 +10,7 @@ class ChallengeService:
     """Class which contain all logic belongs to challenge"""
 
     @staticmethod
-    def create_challenge(data: dict, user: User) -> None:
+    def create_challenge(data: dict, user: User) -> Challenge:
         """Creates challenge"""
 
         challenge_name = data['name']
@@ -25,3 +25,36 @@ class ChallengeService:
             bet=data['bet'],
         )
         challenge.save()
+        return challenge
+
+    @staticmethod
+    def is_video_example_file_valid(data: dict) -> bool:
+        """Validates video file."""
+        if 'video_example' not in data:
+            return False
+        if not data['video_example']:
+            return False
+        if not data['video_example'].name[-3:] == 'mp4':
+            return False
+        return True
+
+    @staticmethod
+    def update_video_example(user: User, challenge: Challenge,
+                               video_example_file: '') -> Challenge:
+        """Updates video example for challenge."""
+        file_name = f'{user.id}_{challenge.id}.mp4'
+        if challenge.video_example:
+            ChallengeService.__delete_existing_video_example(file_name)
+
+        challenge.video_example = video_example_file
+        challenge.video_example.name = file_name
+        challenge.save()
+        return challenge
+
+    @staticmethod
+    def __delete_existing_video_example(file_name: str) -> None:
+        try:
+            os.remove(os.path.join(settings.MEDIA_ROOT,
+                                   f'video_examples/{file_name}'))
+        except FileNotFoundError:
+            pass

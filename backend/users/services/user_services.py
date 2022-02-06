@@ -1,4 +1,3 @@
-from .email_services import EmailService
 from users.models import User
 
 

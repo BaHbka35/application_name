@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import FileExtensionValidator
 
 from users.models import User
 
@@ -28,9 +29,10 @@ class Challenge(models.Model):
         verbose_name='requirements for how challenge must be done',
         max_length=500)
 
-    video_example = models.FileField(upload_to='video_examples',
-                                     verbose_name='example of perform',
-                                     blank=True, null=True)
+    video_example = models.FileField(
+        upload_to='video_examples', verbose_name='example of perform',
+        validators=[FileExtensionValidator(allowed_extensions=['mp4'])],
+        blank=True, null=True)
 
     bet = models.PositiveIntegerField(
         default=0, verbose_name='amount coins for accept challenge')
