@@ -1,4 +1,4 @@
-from users.models import User
+from users.models import User, UserBalance
 
 
 class UserService:
@@ -31,3 +31,8 @@ class UserService:
         user.trains_now = data['trains_now']
         user.save()
         return user
+
+    @staticmethod
+    def has_user_enough_coins(user: User, required_coins_amount: int) -> bool:
+        """Has user more or equal coins amount than was given"""
+        return user.balance.coins_amount >= required_coins_amount

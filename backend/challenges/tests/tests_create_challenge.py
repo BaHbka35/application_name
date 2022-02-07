@@ -6,7 +6,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from users.models import User
-from challenges.models import Challenge
+from challenges.models import Challenge, ChallengeBalance
 from services_for_tests.for_tests import registrate_and_activate_user, \
                                          get_auth_headers, \
                                          set_auth_headers
@@ -57,7 +57,9 @@ class CreateChallengeTests(APITestCase):
 
     def setUp(self):
         """Registrate, activate user."""
-        registrate_and_activate_user(signup_data)
+        user = registrate_and_activate_user(signup_data)
+        user.balance.coins_amount = 50
+        user.balance.save()
         auth_headers = get_auth_headers(login_data)
         set_auth_headers(self, auth_headers)
 
@@ -69,6 +71,10 @@ class CreateChallengeTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(challenge.slug, f'{user.id}_challenge_name')
         self.assertEqual(challenge.creator.username, 'Luk')
+        self.assertEqual(ChallengeBalance.objects.count(), 1)
+        self.assertEqual(ChallengeBalance.objects.get().challenge, challenge)
+        self.assertEqual(ChallengeBalance.objects.get().coins_amount, 50)
+        self.assertEqual(user.balance.coins_amount, 0)
 
     def test_same_user_create_two_challenges_with_same_name(self):
         """Tests creating challenge with same names by same user."""
@@ -78,12 +84,15 @@ class CreateChallengeTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response2.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(Challenge.objects.count(), 1)
+        self.assertEqual(ChallengeBalance.objects.count(), 1)
 
     def test_two_user_create_challenge_with_same_name(self):
         """Tests creating challenge with same names by different users."""
         response = self.client.post(self.url, data=self.data, format='json')
 
-        registrate_and_activate_user(signup_data2)
+        user = registrate_and_activate_user(signup_data2)
+        user.balance.coins_amount = 50
+        user.balance.save()
         auth_headers2 = get_auth_headers(login_data2)
         set_auth_headers(self, auth_headers2)
         response2 = self.client.post(self.url, data=self.data, format='json')
@@ -91,6 +100,7 @@ class CreateChallengeTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response2.status_code, status.HTTP_200_OK)
         self.assertEqual(Challenge.objects.count(), 2)
+        self.assertEqual(ChallengeBalance.objects.count(), 2)
 
     def test_creating_challenge_with_not_right_data_finish_format(self):
         """
@@ -102,6 +112,7 @@ class CreateChallengeTests(APITestCase):
         response = self.client.post(self.url, data=data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(Challenge.objects.count(), 0)
+        self.assertEqual(ChallengeBalance.objects.count(), 0)
 
     def test_creating_challenge_with_letter_in_bet_field(self):
         """Tests creating challenge when bet field contain letter."""
@@ -110,6 +121,7 @@ class CreateChallengeTests(APITestCase):
         response = self.client.post(self.url, data=data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(Challenge.objects.count(), 0)
+        self.assertEqual(ChallengeBalance.objects.count(), 0)
 
     def test_creating_challenge_with_float_number_in_bet_field(self):
         """Tests creating challenge when bet_field is float number."""
@@ -118,6 +130,7 @@ class CreateChallengeTests(APITestCase):
         response = self.client.post(self.url, data=data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(Challenge.objects.count(), 0)
+        self.assertEqual(ChallengeBalance.objects.count(), 0)
 
     def test_creating_challenge_with_not_right_finish_date(self):
         """Tests creating challenge when
@@ -127,6 +140,7 @@ class CreateChallengeTests(APITestCase):
         response = self.client.post(self.url, data=data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(Challenge.objects.count(), 0)
+        self.assertEqual(ChallengeBalance.objects.count(), 0)
 
     def test_creating_free_challenge(self):
         """Tests creating free challenge(bet=0)."""
@@ -135,6 +149,30 @@ class CreateChallengeTests(APITestCase):
         response = self.client.post(self.url, data=data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Challenge.objects.count(), 1)
+        self.assertEqual(Challenge.objects.get().is_free, True)
+        self.assertEqual(ChallengeBalance.objects.count(), 1)
+
+    def test_creating_challenge_without_enough_coinst(self):
+        """Tests creating challenge when user hasn't enough coinst."""
+        user = User.objects.get()
+        user.balance.coins_amount = 10
+        user.balance.save()
+        response = self.client.post(self.url, data=self.data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Challenge.objects.count(), 0)
+        self.assertEqual(ChallengeBalance.objects.count(), 0)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

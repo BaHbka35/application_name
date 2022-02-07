@@ -81,3 +81,12 @@ class NotConfirmedEmail(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
     email = models.EmailField(
         max_length=50, verbose_name='email that user not confirmed')
+
+
+class UserBalance(models.Model):
+    """User balance"""
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True,
+                                related_name='balance')
+    coins_amount = models.PositiveIntegerField(verbose_name='coins amount',
+                                               default=0)

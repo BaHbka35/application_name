@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import User, NotConfirmedEmail
+from .models import User, NotConfirmedEmail, UserBalance
 
 
 @admin.register(User)
@@ -20,3 +20,8 @@ class UserAdmin(admin.ModelAdmin):
 @admin.register(NotConfirmedEmail)
 class NotConfirmedEmailAdmin(admin.ModelAdmin):
     list_display = ('user', 'email',)
+
+
+@admin.register(UserBalance)
+class UserBalanceAdmin(admin.ModelAdmin):
+    list_display = ('user', 'coins_amount',)

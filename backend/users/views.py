@@ -11,7 +11,9 @@ from rest_framework.permissions import IsAuthenticated
 from .serializers import SignUpSerializer, LogInSerializer, \
                          UsersListSerializer, ChangePasswordSerializer, \
                          UpdateUserDateSerializer, ChangeUserEmailSerializer
-from .models import User, NotConfirmedEmail
+
+from .models import User, NotConfirmedEmail, UserBalance
+
 from .services.email_services import EmailService
 from .services.token_services import TokenService
 from .services.user_services import UserService
@@ -29,6 +31,7 @@ class SignUpView(APIView):
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = User.objects.create_user(**serializer.data)
+        UserBalance(user=user).save()
         EmailService.send_email_for_activate_account(request, user)
 
         data = serializer.data
