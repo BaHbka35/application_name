@@ -1,6 +1,7 @@
 from django.contrib import admin
 
-from .models import Challenge, ChallengeMember, ChallegeWinner, ChallengeAnswer
+from .models import Challenge, ChallengeMember, ChallegeWinner,\
+                    ChallengeAnswer, ChallengeBalance
 
 @admin.register(Challenge)
 class ChallengeAdmin(admin.ModelAdmin):
@@ -30,3 +31,8 @@ class ChallengeWinnerAdmin(admin.ModelAdmin):
 class ChallengeAnserAdmin(admin.ModelAdmin):
     """Setting for challenge answer admin page."""
     list_display = ('challenge_member', 'challenge',)
+
+
+@admin.register(ChallengeBalance)
+class ChallengeBalanceAdmin(admin.ModelAdmin):
+    list_display = ('challenge', 'coins_amount',)

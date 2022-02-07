@@ -35,7 +35,6 @@ class DeleteUserAccountTests(APITestCase):
     def test_delete_user(self):
         """Check that user was deleted successfully."""
         response = self.client.delete(self.url, format='json')
-
-        users_amount = User.objects.all().count()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(users_amount, 0)
+        self.assertEqual(User.objects.count(), 0)
+        self.assertEqual(UserBalance.objects.count(), 0)

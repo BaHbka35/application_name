@@ -43,6 +43,9 @@ class Challenge(models.Model):
     is_active = models.BooleanField(verbose_name='is challenge active',
                                     default=True)
 
+    is_free = models.BooleanField(verbose_name='is challenge freee',
+                                  default=False)
+
     def __str__(self):
         return self.name
 
@@ -90,3 +93,19 @@ class ChallengeAnswer(models.Model):
     def __str__(self):
         return f'asnwer from "{self.challenge_member.user.username}" \
             for challenge "{self.challenge.name}"'
+
+
+class ChallengeBalance(models.Model):
+    """Sum of all bets of challenge memebers."""
+
+    challenge = models.OneToOneField(Challenge, on_delete=models.CASCADE)
+    coins_amount = models.PositiveIntegerField(verbose_name='coins amount')
+
+
+
+
+
+
+
+
+
