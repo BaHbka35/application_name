@@ -3,7 +3,7 @@ from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
 
-from users.models import User
+from users.models import User, UserBalance
 
 
 class SignUpAPITests(APITestCase):
@@ -22,10 +22,14 @@ class SignUpAPITests(APITestCase):
     def test_create_account(self):
         """Tests creating user with right fields."""
         response = self.client.post(self.url, self.data, format='json')
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(User.objects.get().username, 'Luk')
         self.assertEqual(User.objects.count(), 1)
         self.assertEqual('password' in response.data, False)
+
+        self.assertEqual(UserBalance.objects.get().user, User.objects.get())
+        self.assertEqual(UserBalance.objects.count(), 1)
 
     def test_create_account_with_different_passwords(self):
         """Tests creating user with different passwords."""
@@ -35,6 +39,8 @@ class SignUpAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(User.objects.count(), 0)
 
+        self.assertEqual(UserBalance.objects.count(), 0)
+
     def test_create_account_with_short_password(self):
         """Tests creating user with short password."""
         data = self.data.copy()
@@ -43,6 +49,8 @@ class SignUpAPITests(APITestCase):
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(User.objects.count(), 0)
+
+        self.assertEqual(UserBalance.objects.count(), 0)
 
     def test_create_account_with_not_suitable_name(self):
         """Tests creating user with not suitable chars in first_name."""
@@ -55,10 +63,12 @@ class SignUpAPITests(APITestCase):
 
         data['first_name'] = '"ladjfliakdf'
         response3 = self.client.post(self.url, data, format='json')
+
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response2.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response3.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(User.objects.count(), 0)
+        self.assertEqual(UserBalance.objects.count(), 0)
 
     def test_create_account_with_not_suitable_surname(self):
         """Tests creating user with not suitable chars in surname."""
@@ -71,10 +81,12 @@ class SignUpAPITests(APITestCase):
 
         data['surname'] = '"ladjfliakdf'
         response3 = self.client.post(self.url, data, format='json')
+
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response2.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response3.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(User.objects.count(), 0)
+        self.assertEqual(UserBalance.objects.count(), 0)
 
     def test_create_users_with_same_email(self):
         """Tests creating user with email that already exists."""
@@ -91,8 +103,10 @@ class SignUpAPITests(APITestCase):
             'password2': '123456789'
         }
         response = self.client.post(self.url, data2, format='json')
+
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(User.objects.count(), 1)
+        self.assertEqual(UserBalance.objects.count(), 1)
 
     def test_create_users_with_same_username(self):
         """Tests creating user with username that already exists."""
@@ -109,8 +123,10 @@ class SignUpAPITests(APITestCase):
             'password2': '123456789'
         }
         response = self.client.post(self.url, data2, format='json')
+
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(User.objects.count(), 1)
+        self.assertEqual(UserBalance.objects.count(), 1)
 
     def test_create_users_without_some_field(self):
         """Tests creating user without some field."""
@@ -120,3 +136,4 @@ class SignUpAPITests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(User.objects.count(), 0)
+        self.assertEqual(UserBalance.objects.count(), 0)

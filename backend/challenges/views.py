@@ -4,9 +4,11 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import FileUploadParser
 
-from .models import Challenge
+from .models import Challenge, ChallengeBalance
 from .serializers import CreateChallengeSerializer
 from .services.challenge_services import ChallengeService
+
+from users.services.user_services import UserService
 
 
 class CreateChallengeView(APIView):
@@ -20,15 +22,24 @@ class CreateChallengeView(APIView):
         serializer.is_valid(raise_exception=True)
         user = request.user
 
-        is_current_user_challenge_with_same_name = Challenge.objects.all().filter(
+        current_user_challenge_with_same_name = Challenge.objects.all().filter(
             creator=user, name=serializer.data['name'])
-        if is_current_user_challenge_with_same_name:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        if current_user_challenge_with_same_name:
+            data = {'message': 'user already has challenge with this name'}
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+        if not UserService.has_user_enough_coins(user, serializer.data['bet']):
+            data = {'message': 'user hasn\'t enough coinst for create challange'}
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            ChallengeService.create_challenge(serializer.data, user)
+            challenge = ChallengeService.create_challenge(serializer.data, user)
         except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            data = {'message': 'creating challenge error'}
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+        ChallengeBalance(challenge=challenge, coins_amount=challenge.bet).save()
+        user.balance.coins_amount -= challenge.bet
+        user.balance.save()
 
         return Response(status=status.HTTP_200_OK)
 

@@ -24,6 +24,8 @@ class ChallengeService:
             requirements=data['requirements'],
             bet=data['bet'],
         )
+        if challenge.bet == 0:
+            challenge.is_free = True
         challenge.save()
         return challenge
 

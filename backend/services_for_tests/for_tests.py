@@ -1,6 +1,6 @@
 import datetime
 
-from users.models import User
+from users.models import User, UserBalance
 from users.services.datetime_services import DatetimeService
 from users.services.token_services import TokenService
 from users.services.token_signature_services import TokenSignatureService
@@ -9,6 +9,7 @@ from users.services.token_signature_services import TokenSignatureService
 def registrate_user(signup_data: dict) -> User:
     """Register user"""
     user = User.objects.create_user(**signup_data)
+    UserBalance(user=user).save()
     return user
 
 
