@@ -2,7 +2,7 @@ from django.core.mail import EmailMessage
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 
-from users.models import User
+from users.models import User, NotConfirmedEmail
 from .token_services import TokenService
 from .datetime_services import DatetimeService
 
@@ -72,3 +72,31 @@ class EmailService:
             'domain': current_site.domain
         }
         return content
+
+    @staticmethod
+    def add_email_to_not_confirmed(user: User, new_user_email: str) -> None:
+        """Add email to not confirmed list"""
+        try:
+            obj = NotConfirmedEmail.objects.get(user=user)
+        except NotConfirmedEmail.DoesNotExist:
+            obj = None
+
+        if obj:
+            obj.delete()
+        NotConfirmedEmail(user=user, email=new_user_email).save()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -26,7 +26,7 @@ class DatetimeService:
         return encrypted_datetime.decode()
 
     @classmethod
-    def check_encrypted_datetime(cls, encrypted_datetime: str) -> bool:
+    def get_decrypted_datetime(cls, encrypted_datetime: str) -> datetime:
         """Checks encrypted datetime. Return True if all is good."""
         encrypted_datetime_bytes = encrypted_datetime.encode()
         try:
@@ -35,9 +35,13 @@ class DatetimeService:
             return False
         datetime_str = a.decode()
 
-        datetimeobj = datetime.datetime.strptime(datetime_str,
-                                                 "%Y-%m-%d %H:%M:%S")
-        datatime_now = datetime.datetime.now()
-        time_difference = datatime_now - datetimeobj
+        datetime_obj = datetime.datetime.strptime(datetime_str,
+                                                  "%Y-%m-%d %H:%M:%S")
+        return datetime_obj
 
+    @classmethod
+    def check_token_lifetime(cls, datetime_obj: datetime) -> bool:
+        """Checks is token lifetime is available."""
+        datatime_now = datetime.datetime.now()
+        time_difference = datatime_now - datetime_obj
         return not time_difference.total_seconds() > 60 * 60 * 24
