@@ -6,7 +6,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from users.models import User
-from challenges.models import Challenge, ChallengeBalance
+from challenges.models import Challenge, ChallengeBalance, ChallengeMember
 from services_for_tests.for_tests import registrate_and_activate_user, \
                                          get_auth_headers, \
                                          set_auth_headers
@@ -75,6 +75,8 @@ class CreateChallengeTests(APITestCase):
         self.assertEqual(ChallengeBalance.objects.get().challenge, challenge)
         self.assertEqual(ChallengeBalance.objects.get().coins_amount, 50)
         self.assertEqual(user.balance.coins_amount, 0)
+        self.assertEqual(ChallengeMember.objects.get().user, user)
+        self.assertEqual(ChallengeMember.objects.count(), 1)
 
     def test_create_challenge_for_not_auth_user(self):
         """Tests creating challenge of users that not auth."""

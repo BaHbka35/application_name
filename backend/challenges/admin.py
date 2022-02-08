@@ -9,7 +9,7 @@ class ChallengeAdmin(admin.ModelAdmin):
 
     list_display = ('name', 'creator', 'finish_datetime',
                     'bet', 'total_bets_sum',)
-    readonly_fields = ('start_datetime', 'total_bets_sum',)
+    readonly_fields = ('start_datetime', 'total_bets_sum', 'id')
     prepopulated_fields = {'slug': ('name',)}
     list_filter = ('creator', 'bet',)
     search_fields = ('name', 'creator__username',)
