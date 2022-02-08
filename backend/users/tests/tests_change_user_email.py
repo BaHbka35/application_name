@@ -42,3 +42,10 @@ class ChangeUserEmailTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(NotConfirmedEmail.objects.get().email,
                          self.data['new_user_email'])
+
+    def test_change_user_email_for_not_auth_user(self):
+        """Tests changing email for not auth user."""
+        self.client.credentials()
+        response = self.client.get(self.url, data=self.data,
+                                   forma='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

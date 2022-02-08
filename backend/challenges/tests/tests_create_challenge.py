@@ -76,6 +76,14 @@ class CreateChallengeTests(APITestCase):
         self.assertEqual(ChallengeBalance.objects.get().coins_amount, 50)
         self.assertEqual(user.balance.coins_amount, 0)
 
+    def test_create_challenge_for_not_auth_user(self):
+        """Tests creating challenge of users that not auth."""
+        self.client.credentials()
+        response = self.client.post(self.url, data=self.data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(Challenge.objects.count(), 0)
+        self.assertEqual(ChallengeBalance.objects.count(), 0)
+
     def test_same_user_create_two_challenges_with_same_name(self):
         """Tests creating challenge with same names by same user."""
         response = self.client.post(self.url, data=self.data, format='json')
@@ -152,8 +160,8 @@ class CreateChallengeTests(APITestCase):
         self.assertEqual(Challenge.objects.get().is_free, True)
         self.assertEqual(ChallengeBalance.objects.count(), 1)
 
-    def test_creating_challenge_without_enough_coinst(self):
-        """Tests creating challenge when user hasn't enough coinst."""
+    def test_creating_challenge_without_enough_coins(self):
+        """Tests creating challenge when user hasn't enough coins."""
         user = User.objects.get()
         user.balance.coins_amount = 10
         user.balance.save()

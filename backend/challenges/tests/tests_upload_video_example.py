@@ -76,6 +76,15 @@ class UploadVideoExampleTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(amount_files_in_dir), 1)
 
+    def test_upload_video_of_user_that_not_auth(self):
+        """Tests upload video example of user that not auth."""
+        self.client.credentials()
+        response = self.client.put(self.url, data=self.data,
+                                   format='multipart')
+        amount_files_in_dir = os.listdir(self.storage_dirrectory)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(len(amount_files_in_dir), 0)
+
     def test_upload_video_when_challenge_already_has_video_example(self):
         """Tests uploading video when challenge already has video example."""
         response = self.client.put(self.url, data=self.data,
