@@ -81,6 +81,7 @@ When User must be authenticated, server must get request with headers:
 
 ## User logout
 !!! User must be authenticated
+
 **GET logout/**
 
 Input: {}
@@ -95,6 +96,7 @@ If not:
 
 ## Change user password
 !!! User must be authenticated
+
 **PUT change_user_password/**
 
 Input: 
@@ -115,6 +117,7 @@ if not:
 
 ## Delete user account
 !!! User must be authenticated
+
 **DELETE delete_user_account/**
 
 Input: {}
@@ -129,6 +132,7 @@ if not:
 		
 ## Update user data
 !!! User must be authenticated
+
 **PUT update_user_data/**
 
 Input:
@@ -153,6 +157,7 @@ if not:
 
 ## Get users list
 !!! User must be authenticated
+
 **GET users_list/**
 
 Input: {}
@@ -181,6 +186,7 @@ if not:
 	
 ## Change user email
 !!! User must be authenticated
+
 **GET change_user_email/**
 
 Input: 

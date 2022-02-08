@@ -98,7 +98,8 @@ class ChallengeAnswer(models.Model):
 class ChallengeBalance(models.Model):
     """Sum of all bets of challenge memebers."""
 
-    challenge = models.OneToOneField(Challenge, on_delete=models.CASCADE)
+    challenge = models.OneToOneField(Challenge, on_delete=models.CASCADE,
+                                     related_name='balance')
     coins_amount = models.PositiveIntegerField(verbose_name='coins amount')
 
 

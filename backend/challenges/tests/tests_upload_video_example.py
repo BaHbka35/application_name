@@ -26,6 +26,7 @@ login_data = {
     'username': 'Luk',
     'password': '123456789'
 }
+
 data_for_challenge = {
     'name': 'challenge_name',
     'finish_datetime': '2023-02-02 18:25:43',

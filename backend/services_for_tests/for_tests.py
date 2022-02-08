@@ -5,6 +5,9 @@ from users.services.datetime_services import DatetimeService
 from users.services.token_services import TokenService
 from users.services.token_signature_services import TokenSignatureService
 
+from challenges.models import Challenge, ChallengeBalance, ChallengeMember
+from challenges.services.challenge_services import ChallengeService
+
 
 def registrate_user(signup_data: dict) -> User:
     """Register user"""
@@ -39,6 +42,14 @@ def get_auth_headers(login_data: dict) -> dict:
 def set_auth_headers(self, data: dict) -> None:
     """Sets headers for authentication."""
     self.client.credentials(HTTP_TOKEN=data['token'], HTTP_SIGNATURE=data['signature'])
+
+
+def create_challenge(data: dict, user) -> Challenge:
+    """Creates challenge."""
+    challenge = ChallengeService.create_challenge(data, user)
+    ChallengeBalance(challenge=challenge, coins_amount=challenge.bet).save()
+    ChallengeMember(user=user, challenge=challenge).save()
+    return challenge
 
 
 class ForTestsDateTimeService(DatetimeService):

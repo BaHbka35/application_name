@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import FileUploadParser
 
-from .models import Challenge, ChallengeBalance
+from .models import Challenge, ChallengeBalance, ChallengeMember
 from .serializers import CreateChallengeSerializer
 from .services.challenge_services import ChallengeService
 
@@ -29,7 +29,7 @@ class CreateChallengeView(APIView):
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
         if not UserService.has_user_enough_coins(user, serializer.data['bet']):
-            data = {'message': 'user hasn\'t enough coinst for create challange'}
+            data = {'message': 'user hasn\'t enough coins for create challange'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -40,6 +40,8 @@ class CreateChallengeView(APIView):
         ChallengeBalance(challenge=challenge, coins_amount=challenge.bet).save()
         user.balance.coins_amount -= challenge.bet
         user.balance.save()
+
+        ChallengeMember(user=user, challenge=challenge).save()
 
         return Response(status=status.HTTP_200_OK)
 
@@ -62,8 +64,32 @@ class UploadVideoExampleView(APIView):
         return Response(status=status.HTTP_200_OK)
 
 
+class AcceptChallengeView(APIView):
+    """View for accept challenge by user."""
 
+    permission_classes = [IsAuthenticated]
 
+    def get(self, request, challenge_id: int) -> Response:
+        """Makes user member of challenge."""
+        challenge = Challenge.objects.get(id=challenge_id)
+        user = request.user
+
+        if ChallengeMember.objects.all().filter(user=user, challenge=challenge):
+            data = {'message': 'user have already accepted this challenge'}
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+        if not UserService.has_user_enough_coins(user, challenge.bet):
+            data = {'message': 'user hasn\'t enough coins for accept challange'}
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+        ChallengeMember(user=user, challenge=challenge).save()
+        if not challenge.is_free:
+            user.balance.coins_amount -= challenge.bet
+            user.balance.save()
+            challenge.balance.coins_amount += challenge.bet
+            challenge.balance.save()
+
+        return Response(status=status.HTTP_200_OK)
 
 
 
