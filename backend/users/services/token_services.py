@@ -35,8 +35,7 @@ class TokenService:
     @classmethod
     def delete_user_auth_token(cls, user: User) -> None:
         """Delete user authentication token."""
-        token = Token.objects.get(user=user)
-        token.delete()
+        Token.objects.get(user=user).delete()
 
     @classmethod
     def get_email_confirmation_token(cls, user: User, encrypted_datetime: str,
@@ -50,7 +49,7 @@ class TokenService:
         return hash_object.hexdigest()
 
     @classmethod
-    def check_email_confirmation_token(
+    def is_email_confirmation_token_belongs_to_current_user(
             cls, user: User, encrypted_datetime: str, token: str, new_user_email: str
             ) -> bool:
         """Check is given token belongs to user who is changing email."""

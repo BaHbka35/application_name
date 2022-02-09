@@ -77,7 +77,8 @@ class LogInView(APIView):
         """
         serializer = LogInSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = self.__get_authenticated_user(serializer.data)
+        user = authenticate(username=serializer.data['username'],
+                            password=serializer.data['password'])
         if not user:
             data = {'message': 'Username or password incorrect.'}
             return Response(data=data,
@@ -90,13 +91,6 @@ class LogInView(APIView):
         signature = TokenSignatureService.get_signature(token)
         data = {'token': token, 'signature': signature}
         return Response(data=data, status=status.HTTP_200_OK)
-
-    def __get_authenticated_user(self, data: dict) -> Optional[User]:
-        """Authenticate user and return user or None."""
-        username = data["username"]
-        password = data["password"]
-        user = authenticate(username=username, password=password)
-        return user
 
 
 class LogOutView(APIView):
@@ -122,7 +116,7 @@ class ChangePasswordView(APIView):
         serializer.is_valid(raise_exception=True)
         user = request.user
         UserService.change_user_password(
-            user, serializer.data["new_password"])
+            user, serializer.data['new_password'])
         TokenService.delete_user_auth_token(user)
         return Response(status=status.HTTP_200_OK)
 
@@ -134,9 +128,7 @@ class DeleteUserAccountView(APIView):
 
     def delete(self, request) -> Response:
         """Deletes user account."""
-        user = request.user
-        TokenService.delete_user_auth_token(user)
-        user.delete()
+        request.user.delete()
         return Response(status=status.HTTP_200_OK)
 
 
@@ -161,14 +153,10 @@ class UsersListView(APIView):
 
     def get(self, request) -> Response:
         """Returns list of users."""
-        users_list = self.__get_users_list()
-        return Response(data=users_list, status=status.HTTP_200_OK)
-
-    def __get_users_list(self) -> list:
-        """Get queryset than serialize it and return users list."""
         queryset = User.objects.all()
         serializer = UsersListSerializer(queryset, many=True)
-        return json.loads(json.dumps(serializer.data))
+        users_list = json.loads(json.dumps(serializer.data))
+        return Response(data=users_list, status=status.HTTP_200_OK)
 
 
 class UserChangeEmailView(APIView):
@@ -178,8 +166,8 @@ class UserChangeEmailView(APIView):
 
     def put(self, request) -> Response:
         """
-        Writes new user email in not confirmed emails and
-        sends message to new user email with confirmation link.
+        Writes new user email in not confirmed emails and sends
+        message to new user email with confirmation link.
         """
         serializer = ChangeUserEmailSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -205,13 +193,14 @@ class EmailConfirmationView(APIView):
             data = {'message': 'Lifetime of token is finished.'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
-        if TokenService.check_email_confirmation_token(
+        if not TokenService.is_email_confirmation_token_belongs_to_current_user(
                 user, encrypted_datetime, token,  new_user_email):
-            user.email = new_user_email
-            user.save()
-            not_confirmed_email.delete()
-            return Response(status=status.HTTP_200_OK)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        user.email = new_user_email
+        user.save()
+        not_confirmed_email.delete()
+        return Response(status=status.HTTP_200_OK)
 
 
 
