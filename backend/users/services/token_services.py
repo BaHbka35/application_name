@@ -1,4 +1,5 @@
 import hashlib
+import datetime
 
 from django.conf import settings
 
@@ -54,6 +55,13 @@ class TokenService:
             ) -> bool:
         """Check is given token belongs to user who is changing email."""
         return token == cls.get_email_confirmation_token(user, encrypted_datetime, new_user_email)
+
+    @classmethod
+    def check_token_lifetime(cls, datetime_obj: datetime) -> bool:
+        """Checks is token lifetime is available."""
+        datetime_now = datetime.datetime.now()
+        time_difference = datetime_now - datetime_obj
+        return not time_difference.total_seconds() > 60 * 60 * 24
 
 
 

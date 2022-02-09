@@ -52,7 +52,7 @@ class AccountActivationView(APIView):
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
         decrypted_datetime = DatetimeService.get_decrypted_datetime(encrypted_datetime)
-        if not DatetimeService.check_token_lifetime(decrypted_datetime):
+        if not TokenService.check_token_lifetime(decrypted_datetime):
             data = {'message': 'Lifetime of token is finished.'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -189,7 +189,7 @@ class EmailConfirmationView(APIView):
         new_user_email = not_confirmed_email.email
 
         decrypted_datetime = DatetimeService.get_decrypted_datetime(encrypted_datetime)
-        if not DatetimeService.check_token_lifetime(decrypted_datetime):
+        if not TokenService.check_token_lifetime(decrypted_datetime):
             data = {'message': 'Lifetime of token is finished.'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 

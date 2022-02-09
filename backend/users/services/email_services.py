@@ -75,7 +75,7 @@ class EmailService:
 
     @staticmethod
     def add_email_to_not_confirmed(user: User, new_user_email: str) -> None:
-        """Add email to not confirmed list"""
+        """Add email to not confirmed emails list"""
         try:
             obj = NotConfirmedEmail.objects.get(user=user)
         except NotConfirmedEmail.DoesNotExist:
