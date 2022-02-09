@@ -29,7 +29,7 @@ class CreateChallengeView(APIView):
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
         if not UserService.has_user_enough_coins(user, serializer.data['bet']):
-            data = {'message': 'user hasn\'t enough coins for create challange'}
+            data = {'message': 'user hasn\'t enough coins for create challenge'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -37,10 +37,9 @@ class CreateChallengeView(APIView):
         except:
             data = {'message': 'creating challenge error'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-        ChallengeBalance(challenge=challenge, coins_amount=challenge.bet).save()
-        user.balance.coins_amount -= challenge.bet
-        user.balance.save()
 
+        ChallengeBalance(challenge=challenge, coins_amount=challenge.bet).save()
+        UserService.withdraw_coins_from_user(user, challenge.bet)
         ChallengeMember(user=user, challenge=challenge).save()
 
         return Response(status=status.HTTP_200_OK)
@@ -79,15 +78,13 @@ class AcceptChallengeView(APIView):
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
         if not UserService.has_user_enough_coins(user, challenge.bet):
-            data = {'message': 'user hasn\'t enough coins for accept challange'}
+            data = {'message': 'user hasn\'t enough coins for accept challenge'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
         ChallengeMember(user=user, challenge=challenge).save()
         if not challenge.is_free:
-            user.balance.coins_amount -= challenge.bet
-            user.balance.save()
-            challenge.balance.coins_amount += challenge.bet
-            challenge.balance.save()
+            UserService.withdraw_coins_from_user(user, challenge.bet)
+            ChallengeService.add_coins_for_challenge(challenge, challenge.bet)
 
         return Response(status=status.HTTP_200_OK)
 

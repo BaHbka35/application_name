@@ -9,10 +9,10 @@ from django.conf import settings
 
 class DatetimeService:
 
-    KEY_FOR_ENCRUPTION = base64.urlsafe_b64encode(
+    KEY_FOR_ENCRYPTION = base64.urlsafe_b64encode(
         settings.SECRET_KEY[:32].encode())
 
-    fernet = Fernet(KEY_FOR_ENCRUPTION)
+    fernet = Fernet(KEY_FOR_ENCRYPTION)
 
     @classmethod
     def get_encrypted_datetime(cls) -> str:
@@ -26,18 +26,21 @@ class DatetimeService:
         return encrypted_datetime.decode()
 
     @classmethod
-    def check_encrypted_datetime(cls, encrypted_datetime: str) -> bool:
+    def get_decrypted_datetime(cls, encrypted_datetime: str) -> datetime:
         """Checks encrypted datetime. Return True if all is good."""
-        encrypted_datetime_bytes = encrypted_datetime.encode()
+        encrypted_datetime_in_bytes = encrypted_datetime.encode()
         try:
-            a = cls.fernet.decrypt(encrypted_datetime_bytes)
+            decrypted_datetime_in_bytes = cls.fernet.decrypt(encrypted_datetime_in_bytes)
         except fernet.InvalidToken:
             return False
-        datetime_str = a.decode()
+        decrypted_datetime_str = decrypted_datetime_in_bytes.decode()
+        datetime_obj = datetime.datetime.strptime(decrypted_datetime_str,
+                                                  "%Y-%m-%d %H:%M:%S")
+        return datetime_obj
 
-        datetimeobj = datetime.datetime.strptime(datetime_str,
-                                                 "%Y-%m-%d %H:%M:%S")
-        datatime_now = datetime.datetime.now()
-        time_difference = datatime_now - datetimeobj
 
-        return not time_difference.total_seconds() > 60 * 60 * 24
+
+
+
+
+

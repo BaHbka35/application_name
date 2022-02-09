@@ -14,7 +14,6 @@ class TokenSignatureService:
         return hash_object.hexdigest()
 
     @classmethod
-    def check_signature(cls, token: str, givven_signature: str) -> bool:
+    def check_signature(cls, token: str, given_signature: str) -> bool:
         """Checks that given signature is correct."""
-        signature = cls.get_signature(token)
-        return signature == givven_signature
+        return cls.get_signature(token) == given_signature
