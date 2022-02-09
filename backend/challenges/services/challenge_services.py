@@ -60,3 +60,15 @@ class ChallengeService:
                                    f'video_examples/{file_name}'))
         except FileNotFoundError:
             pass
+
+    @staticmethod
+    def add_coins_for_challenge(challenge: Challenge, coins_amount: int) -> None:
+        """Add coins to challenge balance"""
+        challenge.balance.coins_amount += coins_amount
+        challenge.balance.save()
+
+    @staticmethod
+    def withdraw_coins_from_challenge(challenge: Challenge, coins_amount: int) -> None:
+        """withdraw coins from challenge balance."""
+        challenge.balance.coins_amount -= coins_amount
+        challenge.balance.save()
