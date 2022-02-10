@@ -82,7 +82,7 @@ class AcceptChallengeView(APIView):
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
         ChallengeMember(user=user, challenge=challenge).save()
-        if not challenge.is_free:
+        if not ChallengeService.is_challenge_free(challenge):
             UserService.withdraw_coins_from_user(user, challenge.bet)
             ChallengeService.add_coins_for_challenge(challenge, challenge.bet)
 
