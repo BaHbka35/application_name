@@ -1,9 +1,8 @@
 import datetime
 
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
 
-from .models import Challenge, ChallengeMember
+from .models import ChallengeMember
 
 
 class CreateChallengeSerializer(serializers.Serializer):
@@ -24,7 +23,7 @@ class CreateChallengeSerializer(serializers.Serializer):
 
 
 class GetChallengesListSerializer(serializers.Serializer):
-    """Serializer for getting active challeges list."""
+    """Serializer for getting active challenges list."""
     name = serializers.CharField(max_length=200)
     goal = serializers.CharField(max_length=200)
     bet = serializers.IntegerField(min_value=0)
@@ -39,7 +38,7 @@ class GetChallengesListSerializer(serializers.Serializer):
         bets_sum = instance.balance.coins_amount
 
         representation['challenge_id'] = instance.id
-        representation['username'] = user.username
+        representation['creator'] = user.username
         representation['members_amount'] = members_amount
         representation['bets_sum'] = bets_sum
         return representation

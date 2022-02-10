@@ -3,8 +3,6 @@ from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
 
-from users.models import User
-from challenges.models import Challenge, ChallengeBalance, ChallengeMember
 from services_for_tests.for_tests import registrate_and_activate_user, \
                                          get_auth_headers, set_auth_headers,\
                                          create_challenge, accept_challenge
@@ -66,7 +64,7 @@ class GetChallengesList(APITestCase):
         expected_data = [{
             'challenge_id': self.challenge.id,
             'name': self.challenge.name,
-            'username': self.user.username,
+            'creator': self.user.username,
             'goal': self.challenge.goal,
             'members_amount': 1,
             'bet': self.challenge.bet,
@@ -86,7 +84,7 @@ class GetChallengesList(APITestCase):
         expected_data = [{
             'challenge_id': self.challenge.id,
             'name': self.challenge.name,
-            'username': self.user.username,
+            'creator': self.user.username,
             'goal': self.challenge.goal,
             'members_amount': 2,
             'bet': self.challenge.bet,
@@ -109,7 +107,7 @@ class GetChallengesList(APITestCase):
             {
                 'challenge_id': self.challenge.id,
                 'name': self.challenge.name,
-                'username': self.user.username,
+                'creator': self.user.username,
                 'goal': self.challenge.goal,
                 'members_amount': 2,
                 'bet': self.challenge.bet,
@@ -119,7 +117,7 @@ class GetChallengesList(APITestCase):
             {
                 'challenge_id': challenge2.id,
                 'name': challenge2.name,
-                'username': self.user2.username,
+                'creator': self.user2.username,
                 'goal': challenge2.goal,
                 'members_amount': 1,
                 'bet': self.challenge.bet,
@@ -144,7 +142,7 @@ class GetChallengesList(APITestCase):
         expected_data = [{
             'challenge_id': self.challenge.id,
             'name': self.challenge.name,
-            'username': self.user.username,
+            'creator': self.user.username,
             'goal': self.challenge.goal,
             'members_amount': 2,
             'bet': self.challenge.bet,
