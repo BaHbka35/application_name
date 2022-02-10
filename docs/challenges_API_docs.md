@@ -67,5 +67,41 @@ if not:
 > status: 400 bad request
 
 
+## Get challenges list
+**GET get_challenges_list/**
+
+you will receive only challenges that are active
+
+input: {}
+
+if success:
+> status: 200 ok
+```json
+[
+  {
+    "name": "challenge_name2",
+    "goal": "make 20 pushups in 10 seconds",
+    "bet": 0,
+    "finish_datetime": "2023-02-02 18:25:43",
+    "challenge_id": 5,
+    "creator": "Luk",
+    "members_amount": 2,
+    "bets_sum": 0
+  },
+  {
+    "name": "challenge_name",
+    "goal": "make 20 pushups in 10 seconds",
+    "bet": 50,
+    "finish_datetime": "2023-02-02 18:25:43",
+    "challenge_id": 6,
+    "creator": "Luk",
+    "members_amount": 2,
+    "bets_sum": 100
+  }
+]
+```
+
+if not:
+> status: 400 bad request
 
 
