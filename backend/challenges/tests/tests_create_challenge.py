@@ -53,7 +53,7 @@ class CreateChallengeTests(APITestCase):
         'description': 'you mush make 20 pushups in 10 seconds',
         'requirements': 'stopwatch must be seen on video',
         'bet': 50
-        }
+    }
 
     def setUp(self):
         """Registrate, activate user."""

@@ -55,7 +55,6 @@ data_for_challenge = {
 class AcceptChallengeTests(APITestCase):
     """Class for tests that test accepting challene."""
 
-
     def setUp(self):
         """Registrate, activate user and update his balance."""
         self.user = registrate_and_activate_user(signup_data)
