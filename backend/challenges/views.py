@@ -1,11 +1,13 @@
+import json
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import FileUploadParser
 
-from .models import Challenge, ChallengeBalance
-from .serializers import CreateChallengeSerializer
+from .models import Challenge, ChallengeBalance, ChallengeMember
+from .serializers import CreateChallengeSerializer, GetChallengesListSerializer
 from .services.challenge_services import ChallengeService
 
 from users.services.user_services import UserService
@@ -29,7 +31,7 @@ class CreateChallengeView(APIView):
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
         if not UserService.has_user_enough_coins(user, serializer.data['bet']):
-            data = {'message': 'user hasn\'t enough coinst for create challange'}
+            data = {'message': 'user hasn\'t enough coins for create challenge'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -37,9 +39,10 @@ class CreateChallengeView(APIView):
         except:
             data = {'message': 'creating challenge error'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
         ChallengeBalance(challenge=challenge, coins_amount=challenge.bet).save()
-        user.balance.coins_amount -= challenge.bet
-        user.balance.save()
+        UserService.withdraw_coins_from_user(user, challenge.bet)
+        ChallengeMember(user=user, challenge=challenge).save()
 
         return Response(status=status.HTTP_200_OK)
 
@@ -62,8 +65,41 @@ class UploadVideoExampleView(APIView):
         return Response(status=status.HTTP_200_OK)
 
 
+class AcceptChallengeView(APIView):
+    """View for accept challenge by user."""
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, challenge_id: int) -> Response:
+        """Makes user member of challenge."""
+        challenge = Challenge.objects.get(id=challenge_id)
+        user = request.user
+
+        if ChallengeMember.objects.all().filter(user=user, challenge=challenge):
+            data = {'message': 'user have already accepted this challenge'}
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+        if not UserService.has_user_enough_coins(user, challenge.bet):
+            data = {'message': 'user hasn\'t enough coins for accept challenge'}
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+        ChallengeMember(user=user, challenge=challenge).save()
+        if not ChallengeService.is_challenge_free(challenge):
+            UserService.withdraw_coins_from_user(user, challenge.bet)
+            ChallengeService.add_coins_for_challenge(challenge, challenge.bet)
+
+        return Response(status=status.HTTP_200_OK)
 
 
+class GetChallengesListView(APIView):
+    """View for getting active challenges list."""
+
+    def get(self, request):
+        """Returns list of active challenges."""
+        queryset = Challenge.objects.all().filter(is_active=True)
+        serializer = GetChallengesListSerializer(queryset, many=True)
+        challenges_list = json.loads(json.dumps(serializer.data))
+        return Response(data=challenges_list, status=status.HTTP_200_OK)
 
 
 

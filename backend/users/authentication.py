@@ -22,7 +22,7 @@ class TokenAndSignatureAuthentication(authentication.BaseAuthentication):
         try:
             token_obj = Token.objects.get(key=token)
         except Token.DoesNotExist:
-            raise exceptions.AuthenticationFaild('No such token')
+            raise exceptions.AuthenticationFailed('No such token')
         user = token_obj.user
 
         return user, token

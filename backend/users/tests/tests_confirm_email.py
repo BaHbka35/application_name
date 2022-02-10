@@ -55,10 +55,11 @@ class EmailConfirmationTests(APITestCase):
         token = TokenService.get_email_confirmation_token(
             self.user, encrypted_datetime, self.new_user_email)
 
-        kwargs = {'id': self.user.id,
-                  'encrypted_datetime': encrypted_datetime,
-                  'token': token
-                  }
+        kwargs = {
+            'id': self.user.id,
+            'encrypted_datetime': encrypted_datetime,
+            'token': token
+        }
 
         url = reverse('users:email_confirmation', kwargs=kwargs)
         response = self.client.get(url)

@@ -36,3 +36,15 @@ class UserService:
     def has_user_enough_coins(user: User, required_coins_amount: int) -> bool:
         """Has user more or equal coins amount than was given"""
         return user.balance.coins_amount >= required_coins_amount
+
+    @staticmethod
+    def add_coins_for_user(user: User, coins_amount: int) -> None:
+        """Add coins to user balance"""
+        user.balance.coins_amount += coins_amount
+        user.balance.save()
+
+    @staticmethod
+    def withdraw_coins_from_user(user: User, coins_amount: int) -> None:
+        """withdraw coins from user balance."""
+        user.balance.coins_amount -= coins_amount
+        user.balance.save()

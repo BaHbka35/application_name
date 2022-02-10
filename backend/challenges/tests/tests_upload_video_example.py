@@ -10,7 +10,8 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from services_for_tests.for_tests import registrate_and_activate_user, \
-                                         get_auth_headers, set_auth_headers
+                                         get_auth_headers, set_auth_headers,\
+                                         create_challenge
 from challenges.services.challenge_services import ChallengeService
 
 
@@ -26,6 +27,7 @@ login_data = {
     'username': 'Luk',
     'password': '123456789'
 }
+
 data_for_challenge = {
     'name': 'challenge_name',
     'finish_datetime': '2023-02-02 18:25:43',
@@ -46,7 +48,7 @@ class UploadVideoExampleTests(APITestCase):
         video_example_dir = 'video_examples/'
         self.__clear_video_example_test_directory(video_example_dir)
         user = registrate_and_activate_user(signup_data)
-        challenge = ChallengeService.create_challenge(data_for_challenge, user)
+        challenge = create_challenge(data_for_challenge, user)
 
         kwargs = {'challenge_id': challenge.id}
         self.url = reverse('challenges:upload_video_example', kwargs=kwargs)
@@ -75,6 +77,15 @@ class UploadVideoExampleTests(APITestCase):
         amount_files_in_dir = os.listdir(self.storage_dirrectory)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(amount_files_in_dir), 1)
+
+    def test_upload_video_of_user_that_not_auth(self):
+        """Tests upload video example of user that not auth."""
+        self.client.credentials()
+        response = self.client.put(self.url, data=self.data,
+                                   format='multipart')
+        amount_files_in_dir = os.listdir(self.storage_dirrectory)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(len(amount_files_in_dir), 0)
 
     def test_upload_video_when_challenge_already_has_video_example(self):
         """Tests uploading video when challenge already has video example."""

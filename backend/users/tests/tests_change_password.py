@@ -75,6 +75,12 @@ class ChangePasswordTests(APITestCase):
         new_user_auth_token = response.data['token']
         self.assertNotEqual(user_auth_token, new_user_auth_token)
 
+    def test_change_password_for_not_auth_user(self):
+        """Tests changing password for user that didn't auth."""
+        self.client.credentials()
+        response = self.client.get(self.url, data=self.data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_new_password_not_equal_new_password2(self):
         """
         Tests changing password when input data not correct.
