@@ -10,4 +10,6 @@ urlpatterns = [
          views.UploadVideoExampleView.as_view(), name='upload_video_example'),
     path('accept_challenge/<int:challenge_id>/',
          views.AcceptChallengeView.as_view(), name='accept_challenge'),
+    path('get_challenges_list/', views.GetChallengesListView.as_view(),
+         name='get_challenges_list'),
 ]

@@ -24,8 +24,6 @@ class ChallengeService:
             requirements=data['requirements'],
             bet=data['bet'],
         )
-        if challenge.bet == 0:
-            challenge.is_free = True
         challenge.save()
         return challenge
 
@@ -72,3 +70,14 @@ class ChallengeService:
         """withdraw coins from challenge balance."""
         challenge.balance.coins_amount -= coins_amount
         challenge.balance.save()
+
+    @staticmethod
+    def is_challenge_free(challenge: Challenge) -> bool:
+        """Checks is challenge free for accept it or not."""
+        return challenge.bet == 0
+
+
+
+
+
+

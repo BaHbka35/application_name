@@ -44,12 +44,18 @@ def set_auth_headers(self, data: dict) -> None:
     self.client.credentials(HTTP_TOKEN=data['token'], HTTP_SIGNATURE=data['signature'])
 
 
-def create_challenge(data: dict, user) -> Challenge:
+def create_challenge(data: dict, user: User) -> Challenge:
     """Creates challenge."""
     challenge = ChallengeService.create_challenge(data, user)
     ChallengeBalance(challenge=challenge, coins_amount=challenge.bet).save()
     ChallengeMember(user=user, challenge=challenge).save()
     return challenge
+
+def accept_challenge(user: User, challenge: Challenge) -> ChallengeMember:
+    """creates challenge member."""
+    challenge_member = ChallengeMember(user=user, challenge=challenge).save()
+    ChallengeService.add_coins_for_challenge(challenge, challenge.bet)
+    return challenge_member
 
 
 class ForTestsDateTimeService(DatetimeService):

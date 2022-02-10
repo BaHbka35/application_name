@@ -53,7 +53,7 @@ class CreateChallengeTests(APITestCase):
         'description': 'you mush make 20 pushups in 10 seconds',
         'requirements': 'stopwatch must be seen on video',
         'bet': 50
-        }
+    }
 
     def setUp(self):
         """Registrate, activate user."""
@@ -159,7 +159,6 @@ class CreateChallengeTests(APITestCase):
         response = self.client.post(self.url, data=data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Challenge.objects.count(), 1)
-        self.assertEqual(Challenge.objects.get().is_free, True)
         self.assertEqual(ChallengeBalance.objects.count(), 1)
 
     def test_creating_challenge_without_enough_coins(self):

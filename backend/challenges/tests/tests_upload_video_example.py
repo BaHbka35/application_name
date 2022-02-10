@@ -10,7 +10,8 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from services_for_tests.for_tests import registrate_and_activate_user, \
-                                         get_auth_headers, set_auth_headers
+                                         get_auth_headers, set_auth_headers,\
+                                         create_challenge
 from challenges.services.challenge_services import ChallengeService
 
 
@@ -47,7 +48,7 @@ class UploadVideoExampleTests(APITestCase):
         video_example_dir = 'video_examples/'
         self.__clear_video_example_test_directory(video_example_dir)
         user = registrate_and_activate_user(signup_data)
-        challenge = ChallengeService.create_challenge(data_for_challenge, user)
+        challenge = create_challenge(data_for_challenge, user)
 
         kwargs = {'challenge_id': challenge.id}
         self.url = reverse('challenges:upload_video_example', kwargs=kwargs)

@@ -1,3 +1,5 @@
+import json
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -5,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import FileUploadParser
 
 from .models import Challenge, ChallengeBalance, ChallengeMember
-from .serializers import CreateChallengeSerializer
+from .serializers import CreateChallengeSerializer, GetChallengesListSerializer
 from .services.challenge_services import ChallengeService
 
 from users.services.user_services import UserService
@@ -82,11 +84,22 @@ class AcceptChallengeView(APIView):
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
         ChallengeMember(user=user, challenge=challenge).save()
-        if not challenge.is_free:
+        if not ChallengeService.is_challenge_free(challenge):
             UserService.withdraw_coins_from_user(user, challenge.bet)
             ChallengeService.add_coins_for_challenge(challenge, challenge.bet)
 
         return Response(status=status.HTTP_200_OK)
+
+
+class GetChallengesListView(APIView):
+    """View for getting active challenges list."""
+
+    def get(self, request):
+        """Returns list of active challenges."""
+        queryset = Challenge.objects.all().filter(is_active=True)
+        serializer = GetChallengesListSerializer(queryset, many=True)
+        challenges_list = json.loads(json.dumps(serializer.data))
+        return Response(data=challenges_list, status=status.HTTP_200_OK)
 
 
 
