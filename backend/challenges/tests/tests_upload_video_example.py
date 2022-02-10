@@ -5,6 +5,7 @@ from django.test import override_settings
 from django.conf import settings
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.files import File
 
 from rest_framework.test import APITestCase
 from rest_framework import status
@@ -12,7 +13,6 @@ from rest_framework import status
 from services_for_tests.for_tests import registrate_and_activate_user, \
                                          get_auth_headers, set_auth_headers,\
                                          create_challenge
-from challenges.services.challenge_services import ChallengeService
 
 
 signup_data = {
@@ -54,8 +54,12 @@ class UploadVideoExampleTests(APITestCase):
         self.url = reverse('challenges:upload_video_example', kwargs=kwargs)
 
         file_path = os.path.join(settings.MEDIA_ROOT, 'video_source/111.mp4')
-        video_for_test = SimpleUploadedFile(file_path, b'video')
-        self.data = {'video_example': video_for_test}
+
+        file = File(open(file_path, 'rb'))
+        uploaded_file = SimpleUploadedFile('111.mp4', file.read(),
+                                           content_type='multipart/form-data')
+
+        self.data = {'video_example': uploaded_file}
 
         self.storage_dirrectory = os.path.join(settings.MEDIA_ROOT, video_example_dir)
 
@@ -91,7 +95,13 @@ class UploadVideoExampleTests(APITestCase):
         """Tests uploading video when challenge already has video example."""
         response = self.client.put(self.url, data=self.data,
                                    format='multipart')
-        response2 = self.client.put(self.url, data=self.data,
+
+        file_path = os.path.join(settings.MEDIA_ROOT, 'video_source/111.mp4')
+        file = File(open(file_path, 'rb'))
+        uploaded_file = SimpleUploadedFile('111.mp4', file.read(),
+                                           content_type='multipart/form-data')
+        data = {'video_example': uploaded_file}
+        response2 = self.client.put(self.url, data=data,
                                     format='multipart')
         amount_files_in_dir = os.listdir(self.storage_dirrectory)
         self.assertEqual(response.status_code, status.HTTP_200_OK)

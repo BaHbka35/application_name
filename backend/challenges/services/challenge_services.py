@@ -40,7 +40,7 @@ class ChallengeService:
 
     @staticmethod
     def update_video_example(user: User, challenge: Challenge,
-                               video_example_file: '') -> Challenge:
+                             video_example_file: '') -> None:
         """Updates video example for challenge."""
         file_name = f'{user.id}_{challenge.id}.mp4'
         if challenge.video_example:
@@ -49,7 +49,6 @@ class ChallengeService:
         challenge.video_example = video_example_file
         challenge.video_example.name = file_name
         challenge.save()
-        return challenge
 
     @staticmethod
     def __delete_existing_video_example(file_name: str) -> None:
