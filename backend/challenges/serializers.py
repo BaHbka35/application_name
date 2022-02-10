@@ -22,8 +22,8 @@ class CreateChallengeSerializer(serializers.Serializer):
         raise serializers.ValidationError('This is past datetime.')
 
 
-class GetChallengesListSerializer(serializers.Serializer):
-    """Serializer for getting active challenges list."""
+class BaseChallengeSerializer(serializers.Serializer):
+    """Base serializer that contain main info about challenge."""
     name = serializers.CharField(max_length=200)
     goal = serializers.CharField(max_length=200)
     bet = serializers.IntegerField(min_value=0)
@@ -42,4 +42,30 @@ class GetChallengesListSerializer(serializers.Serializer):
         representation['members_amount'] = members_amount
         representation['bets_sum'] = bets_sum
         return representation
+
+
+class GetChallengesListSerializer(BaseChallengeSerializer):
+    """Serializer for getting active challenges list."""
+    pass
+
+
+class GetDitailChallengeInfoSerializer(BaseChallengeSerializer):
+    """Serializer for getting detail challenge information."""
+    description = serializers.CharField(max_length=500)
+    requirements = serializers.CharField(max_length=500)
+
+
+    def to_representation(self, instance):
+        """Add exstra fields"""
+        representation = super().to_representation(instance)
+        try:
+            video_example_path = instance.video_example.path
+        except ValueError:
+            video_example_path = None
+        representation['video_example_path'] = video_example_path
+        return representation
+
+
+
+
 

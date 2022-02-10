@@ -1,4 +1,8 @@
+import os
 import datetime
+
+from django.core.files import File
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 from users.models import User, UserBalance
 from users.services.datetime_services import DatetimeService
@@ -56,6 +60,16 @@ def accept_challenge(user: User, challenge: Challenge) -> ChallengeMember:
     challenge_member = ChallengeMember(user=user, challenge=challenge).save()
     ChallengeService.add_coins_for_challenge(challenge, challenge.bet)
     return challenge_member
+
+def upload_video_for_challenge(user: User, challenge: Challenge,
+                               MEDIA_ROOT: str):
+    """Upload video for challenge."""
+    file_path = os.path.join(MEDIA_ROOT, 'video_source/111.mp4')
+
+    file = File(open(file_path, 'rb'))
+    uploaded_file = SimpleUploadedFile('111.mp4', file.read(),
+                                       content_type='multipart/form-data')
+    ChallengeService.update_video_example(user, challenge, uploaded_file)
 
 
 class ForTestsDateTimeService(DatetimeService):

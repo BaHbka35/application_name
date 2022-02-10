@@ -105,3 +105,37 @@ if not:
 > status: 400 bad request
 
 
+## Get detail information about challenge.
+!!! User must be authenticated.
+
+**GET get_detail_challenge/challenge_id/**
+
+
+input: {}
+
+output:
+
+if success:
+> status: 200 ok
+```json
+{
+  "name": "challenge_name2",
+  "goal": "make 20 pushups in 10 seconds",
+  "bet": 0,
+  "finish_datetime": "2023-02-02 18:25:43",
+  "description": "you mush make 20 pushups in 10 seconds",
+  "requirements": "stopwatch must be seen on video",
+  "challenge_id": 5,
+  "creator": "Luk",
+  "members_amount": 2,
+  "bets_sum": 0,
+  "video_example_path": "/home/user/application_name/backend/media/video_examples/3_5.mp4"
+}
+```
+
+If challenge hasn't video example field "video_example_path" will be None
+
+if not:
+> status: 400 bad request
+
+

@@ -7,7 +7,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import FileUploadParser
 
 from .models import Challenge, ChallengeBalance, ChallengeMember
-from .serializers import CreateChallengeSerializer, GetChallengesListSerializer
+from .serializers import CreateChallengeSerializer, GetChallengesListSerializer,\
+                         GetDitailChallengeInfoSerializer
 from .services.challenge_services import ChallengeService
 
 from users.services.user_services import UserService
@@ -100,6 +101,20 @@ class GetChallengesListView(APIView):
         serializer = GetChallengesListSerializer(queryset, many=True)
         challenges_list = json.loads(json.dumps(serializer.data))
         return Response(data=challenges_list, status=status.HTTP_200_OK)
+
+
+class GetDetailChallenge(APIView):
+    """View for getting detail information about specific challenge."""
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, challenge_id: int):
+        """Return detail information about challenge."""
+        queryset = Challenge.objects.get(id=challenge_id)
+        serializer = GetDitailChallengeInfoSerializer(queryset)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+
 
 
 
