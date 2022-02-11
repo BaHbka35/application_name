@@ -110,7 +110,11 @@ class GetDetailChallenge(APIView):
 
     def get(self, request, challenge_id: int):
         """Return detail information about challenge."""
-        queryset = Challenge.objects.get(id=challenge_id)
+        try:
+            queryset = Challenge.objects.get(id=challenge_id)
+        except Challenge.DoesNotExist:
+            data = {'message': 'There isn\'t challenge with given id'}
+            return Response(data=data, status=status.HTTP_404_NOT_FOUND)
         serializer = GetDitailChallengeInfoSerializer(queryset)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 

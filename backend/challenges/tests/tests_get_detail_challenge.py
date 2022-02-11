@@ -185,6 +185,13 @@ class GetDetailChallengeTests(APITestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_get_detail_unexisting_challenge_info(self):
+        """Tests getting information about challenge that doesn't exist."""
+        kwargs = {'challenge_id': 100000000}
+        url = reverse('challenges:get_detail_challenge', kwargs=kwargs)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
 
 
 
