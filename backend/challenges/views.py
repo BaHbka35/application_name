@@ -56,11 +56,18 @@ class UploadVideoExampleView(APIView):
 
     def put(self, request, challenge_id: int) -> Response:
         """Set video example for challenge."""
-        if not ChallengeService.is_video_example_file_valid(request.data):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        video_example_file = request.data['video_example']
         user = request.user
         challenge = Challenge.objects.get(id=challenge_id)
+
+        if not challenge.creator == user:
+            data = {'message': 'You can\'t upload video. You aren\'t creator.'}
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+        if not ChallengeService.is_video_example_file_valid(request.data):
+            data = {'message': 'video file not valid.'}
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+        video_example_file = request.data['video_example']
         ChallengeService.update_video_example(user, challenge,
                                               video_example_file)
         return Response(status=status.HTTP_200_OK)
@@ -72,7 +79,7 @@ class AcceptChallengeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, challenge_id: int) -> Response:
-        """Makes user member of challenge."""
+        """Makes the user a member of challenge."""
         challenge = Challenge.objects.get(id=challenge_id)
         user = request.user
 

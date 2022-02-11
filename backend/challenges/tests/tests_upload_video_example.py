@@ -28,6 +28,19 @@ login_data = {
     'password': '123456789'
 }
 
+signup_data2 = {
+    'first_name': 'Sasha',
+    'surname': 'Kurkin',
+    'username': 'Luk2',
+    'email': 'nepetr286@bk.ru',
+    'password': '123456789',
+}
+
+login_data2 = {
+    'username': 'Luk2',
+    'password': '123456789'
+}
+
 data_for_challenge = {
     'name': 'challenge_name',
     'finish_datetime': '2023-02-02 18:25:43',
@@ -124,8 +137,18 @@ class UploadVideoExampleTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(len(amount_files_in_dir), 0)
 
+    def test_upload_vidoe_example_by_user_that_isnt_a_creator(self):
+        """
+        Tests uploading video examply by user
+        that isn't a challenge creator.
+        """
+        user2 = registrate_and_activate_user(signup_data2)
+        auth_headers2 = get_auth_headers(login_data2)
+        set_auth_headers(self, auth_headers2)
 
-
+        response = self.client.put(self.url, data=self.data,
+                                   format='multipart')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 
