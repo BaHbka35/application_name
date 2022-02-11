@@ -56,11 +56,18 @@ class UploadVideoExampleView(APIView):
 
     def put(self, request, challenge_id: int) -> Response:
         """Set video example for challenge."""
-        if not ChallengeService.is_video_example_file_valid(request.data):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        video_example_file = request.data['video_example']
         user = request.user
         challenge = Challenge.objects.get(id=challenge_id)
+
+        if not challenge.creator == user:
+            data = {'message': 'You can\'t upload video. You aren\'t creator.'}
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+        if not ChallengeService.is_video_example_file_valid(request.data):
+            data = {'message': 'video file not valid.'}
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+        video_example_file = request.data['video_example']
         ChallengeService.update_video_example(user, challenge,
                                               video_example_file)
         return Response(status=status.HTTP_200_OK)
@@ -72,9 +79,13 @@ class AcceptChallengeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, challenge_id: int) -> Response:
-        """Makes user member of challenge."""
+        """Makes the user a member of challenge."""
         challenge = Challenge.objects.get(id=challenge_id)
         user = request.user
+
+        if not challenge.is_active:
+            data = {'message': 'this challenge was finished.'}
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
         if ChallengeMember.objects.all().filter(user=user, challenge=challenge):
             data = {'message': 'user have already accepted this challenge'}
@@ -110,7 +121,11 @@ class GetDetailChallenge(APIView):
 
     def get(self, request, challenge_id: int):
         """Return detail information about challenge."""
-        queryset = Challenge.objects.get(id=challenge_id)
+        try:
+            queryset = Challenge.objects.get(id=challenge_id)
+        except Challenge.DoesNotExist:
+            data = {'message': 'There isn\'t challenge with given id'}
+            return Response(data=data, status=status.HTTP_404_NOT_FOUND)
         serializer = GetDitailChallengeInfoSerializer(queryset)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
