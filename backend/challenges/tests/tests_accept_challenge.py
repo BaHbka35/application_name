@@ -165,7 +165,14 @@ class AcceptChallengeTests(APITestCase):
         self.assertEqual(user2.balance.coins_amount, 50)
         self.assertEqual(challenge.balance.coins_amount, 100)
 
+    def test_accept_challenge_that_was_finished(self):
+        """Tests accepting challenge that was finished."""
+        challenge = Challenge.objects.get()
+        challenge.is_active = False
+        challenge.save()
 
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 

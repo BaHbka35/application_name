@@ -76,6 +76,10 @@ class AcceptChallengeView(APIView):
         challenge = Challenge.objects.get(id=challenge_id)
         user = request.user
 
+        if not challenge.is_active:
+            data = {'message': 'this challenge was finished.'}
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
         if ChallengeMember.objects.all().filter(user=user, challenge=challenge):
             data = {'message': 'user have already accepted this challenge'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
