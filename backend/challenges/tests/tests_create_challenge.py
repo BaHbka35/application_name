@@ -10,27 +10,9 @@ from challenges.models import Challenge, ChallengeBalance, ChallengeMember
 from services_for_tests.for_tests import registrate_and_activate_user, \
                                          get_auth_headers, \
                                          set_auth_headers
-
-signup_data = {
-    'first_name': 'Sasha',
-    'surname': 'Kurkin',
-    'username': 'Luk',
-    'email': 'nepetr86@bk.ru',
-    'password': '123456789',
-}
-
-login_data = {
-    'username': 'Luk',
-    'password': '123456789'
-}
-
-
-signup_data2 = signup_data.copy()
-signup_data2['username'] = 'Petr'
-signup_data2['email'] = 'petr@gmail.com'
-
-login_data2 = login_data.copy()
-login_data2['username'] = 'Petr'
+from services_for_tests.data_for_tests import signup_data, login_data, \
+                                              signup_data2, login_data2, \
+                                              data_for_challenge
 
 
 def get_finish_datatime():
@@ -40,20 +22,12 @@ def get_finish_datatime():
     finish_datetime = finish_datetime.strftime('%Y-%m-%dT%H:%M:%S')
     return finish_datetime
 
-
-
 class CreateChallengeTests(APITestCase):
     """Class for testing creation challenges."""
 
     url = reverse('challenges:create_challenge')
-    data = {
-        'name': 'challenge_name',
-        'finish_datetime': get_finish_datatime(),
-        'goal': 'make 20 pushups in 10 seconds',
-        'description': 'you mush make 20 pushups in 10 seconds',
-        'requirements': 'stopwatch must be seen on video',
-        'bet': 50
-    }
+    data = data_for_challenge.copy()
+    data['finish_datetime'] = get_finish_datatime()
 
     def setUp(self):
         """Registrate, activate user."""

@@ -6,17 +6,19 @@ from rest_framework import status
 from users.models import User, UserBalance
 
 
+signup_data = {
+    'first_name': 'Sasha',
+    'surname': 'Kurkin',
+    'username': 'Luk',
+    'email': 'nepetr86@bk.ru',
+    'password': '123456789',
+    'password2': '123456789',
+}
+
+
 class SignUpAPITests(APITestCase):
     """Class for testing API witch intends for registrate user."""
-
-    data = {
-        'first_name': 'Sasha',
-        'surname': 'Kurkin',
-        'username': 'Luk',
-        'email': 'nepetr86@bk.ru',
-        'password': '123456789',
-        'password2': '123456789'
-    }
+    data = signup_data.copy()
     url = reverse('users:signup')
 
     def test_create_account(self):

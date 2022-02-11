@@ -1,6 +1,4 @@
-from django.conf import settings
 from django.urls import reverse
-from django.core.files.uploadedfile import SimpleUploadedFile
 
 from rest_framework.test import APITestCase
 from rest_framework import status
@@ -8,48 +6,13 @@ from rest_framework import status
 from services_for_tests.for_tests import registrate_and_activate_user,\
                                          get_auth_headers, set_auth_headers,\
                                          create_challenge
+from services_for_tests.data_for_tests import signup_data, login_data, \
+                                              signup_data2, login_data2, \
+                                              data_for_challenge
 
 from users.models import User
 
-from challenges.services.challenge_services import ChallengeService
 from challenges.models import Challenge, ChallengeMember
-
-
-signup_data = {
-    'first_name': 'Sasha',
-    'surname': 'Kurkin',
-    'username': 'Luk',
-    'email': 'nepetr86@bk.ru',
-    'password': '123456789',
-}
-
-login_data = {
-    'username': 'Luk',
-    'password': '123456789'
-}
-
-signup_data2 = {
-    'first_name': 'Sasha',
-    'surname': 'Kurkin',
-    'username': 'Luk2',
-    'email': 'nepetr286@bk.ru',
-    'password': '123456789',
-}
-
-login_data2 = {
-    'username': 'Luk2',
-    'password': '123456789'
-}
-
-
-data_for_challenge = {
-    'name': 'challenge_name',
-    'finish_datetime': '2023-02-02 18:25:43',
-    'goal': 'make 20 pushups in 10 seconds',
-    'description': 'you mush make 20 pushups in 10 seconds',
-    'requirements': 'stopwatch must be seen on video',
-    'bet': 50
-}
 
 
 class AcceptChallengeTests(APITestCase):
@@ -63,7 +26,6 @@ class AcceptChallengeTests(APITestCase):
         self.user2 = registrate_and_activate_user(signup_data2)
         self.user2.balance.coins_amount = 50
         self.user2.balance.save()
-
 
         auth_headers2 = get_auth_headers(login_data2)
         set_auth_headers(self, auth_headers2)
