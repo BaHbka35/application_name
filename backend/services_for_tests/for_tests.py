@@ -1,4 +1,5 @@
 import os
+import shutil
 import datetime
 
 from django.core.files import File
@@ -61,6 +62,7 @@ def accept_challenge(user: User, challenge: Challenge) -> ChallengeMember:
     ChallengeService.add_coins_for_challenge(challenge, challenge.bet)
     return challenge_member
 
+
 def upload_video_for_challenge(user: User, challenge: Challenge,
                                MEDIA_ROOT: str):
     """Upload video for challenge."""
@@ -70,6 +72,15 @@ def upload_video_for_challenge(user: User, challenge: Challenge,
     uploaded_file = SimpleUploadedFile('111.mp4', file.read(),
                                        content_type='multipart/form-data')
     ChallengeService.update_video_example(user, challenge, uploaded_file)
+
+
+def clear_directory(directory: str) -> None:
+    """Clear directory."""
+    try:
+        os.makedirs(directory)
+    except:
+        shutil.rmtree(directory)
+        os.makedirs(directory)
 
 
 class ForTestsDateTimeService(DatetimeService):

@@ -1,5 +1,4 @@
 import os
-import shutil
 
 from django.test import override_settings
 from django.conf import settings
@@ -12,7 +11,7 @@ from rest_framework import status
 
 from services_for_tests.for_tests import registrate_and_activate_user, \
                                          get_auth_headers, set_auth_headers,\
-                                         create_challenge
+                                         create_challenge, clear_directory
 from services_for_tests.data_for_tests import signup_data, login_data, \
                                               signup_data2, login_data2, \
                                               data_for_challenge
@@ -23,16 +22,13 @@ from services_for_tests.data_for_tests import signup_data, login_data, \
 class UploadVideoExampleTests(APITestCase):
     """Class for tests upload video example for challenge."""
 
-
     def setUp(self):
         """Registrate, activate user."""
-        video_example_dir = 'video_examples/'
-        self.__clear_video_example_test_directory(video_example_dir)
+        video_example_dir = os.path.join(settings.MEDIA_ROOT, 'video_examples/')
+        clear_directory(video_example_dir)
+
         user = registrate_and_activate_user(signup_data)
         challenge = create_challenge(data_for_challenge, user)
-
-        kwargs = {'challenge_id': challenge.id}
-        self.url = reverse('challenges:upload_video_example', kwargs=kwargs)
 
         file_path = os.path.join(settings.MEDIA_ROOT, 'video_source/111.mp4')
 
@@ -47,13 +43,8 @@ class UploadVideoExampleTests(APITestCase):
         auth_headers = get_auth_headers(login_data)
         set_auth_headers(self, auth_headers)
 
-    def __clear_video_example_test_directory(self, dir: str) -> None:
-        """Clear test directory that needs for stores video examples for challenge."""
-        try:
-            os.makedirs(os.path.join(settings.MEDIA_ROOT, dir))
-        except:
-            shutil.rmtree(os.path.join(settings.MEDIA_ROOT, dir))
-            os.makedirs(os.path.join(settings.MEDIA_ROOT, dir))
+        kwargs = {'challenge_id': challenge.id}
+        self.url = reverse('challenges:upload_video_example', kwargs=kwargs)
 
     def test_upload_video_correct(self):
         """Tests uploading video when all is good."""
@@ -105,9 +96,9 @@ class UploadVideoExampleTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(len(amount_files_in_dir), 0)
 
-    def test_upload_vidoe_example_by_user_that_isnt_a_creator(self):
+    def test_upload_video_example_by_user_who_is_not_a_creator(self):
         """
-        Tests uploading video examply by user
+        Tests uploading video example by user
         that isn't a challenge creator.
         """
         user2 = registrate_and_activate_user(signup_data2)

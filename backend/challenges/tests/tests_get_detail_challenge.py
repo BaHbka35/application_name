@@ -1,5 +1,5 @@
 import os
-import shutil
+from typing import Optional
 
 from django.urls import reverse
 from django.test import override_settings
@@ -8,14 +8,32 @@ from django.conf import settings
 from rest_framework.test import APITestCase
 from rest_framework import status
 
+from users.models import User
 from challenges.models import Challenge
 from services_for_tests.for_tests import registrate_and_activate_user, \
                                          get_auth_headers, set_auth_headers,\
                                          create_challenge, accept_challenge,\
-                                         upload_video_for_challenge
+                                         upload_video_for_challenge, clear_directory
 from services_for_tests.data_for_tests import signup_data, login_data, \
                                               signup_data2, login_data2, \
                                               data_for_challenge
+
+
+def get_expected_data(challenge: Challenge, user: User, file_path: Optional[str] = None) -> dict:
+    expected_data = {
+        'challenge_id': challenge.id,
+        'name': challenge.name,
+        'creator': user.username,
+        'goal': challenge.goal,
+        'description': challenge.description,
+        'requirements': challenge.requirements,
+        'members_amount': None,
+        'bet': challenge.bet,
+        'bets_sum': None,
+        'finish_datetime': str(challenge.finish_datetime),
+        'video_example_path': file_path
+    }
+    return expected_data
 
 
 @override_settings(MEDIA_ROOT=os.path.join(settings.MEDIA_ROOT, 'test'),
@@ -28,8 +46,8 @@ class GetDetailChallengeTests(APITestCase):
 
     def setUp(self):
         """"""
-        video_example_dir = 'video_examples/'
-        self.__clear_video_example_test_directory(video_example_dir)
+        video_example_dir = os.path.join(settings.MEDIA_ROOT, 'video_examples/')
+        clear_directory(video_example_dir)
 
         self.user = registrate_and_activate_user(signup_data)
         self.challenge = create_challenge(data_for_challenge, self.user)
@@ -45,30 +63,12 @@ class GetDetailChallengeTests(APITestCase):
         kwargs = {'challenge_id': self.challenge.id}
         self.url = reverse('challenges:get_detail_challenge', kwargs=kwargs)
 
-    def __clear_video_example_test_directory(self, dir: str) -> None:
-        """Clear test directory that needs for stores video examples for challenge."""
-        try:
-            os.makedirs(os.path.join(settings.MEDIA_ROOT, dir))
-        except:
-            shutil.rmtree(os.path.join(settings.MEDIA_ROOT, dir))
-            os.makedirs(os.path.join(settings.MEDIA_ROOT, dir))
-
     def test_get_detail_challenge_info_with_one_member(self):
         """Tests getting detail challenge information with one member."""
         response = self.client.get(self.url)
-        expected_data = {
-            'challenge_id': self.challenge.id,
-            'name': self.challenge.name,
-            'creator': self.user.username,
-            'goal': self.challenge.goal,
-            'description': self.challenge.description,
-            'requirements': self.challenge.requirements,
-            'members_amount': 1,
-            'bet': self.challenge.bet,
-            'bets_sum': 50,
-            'finish_datetime': str(self.challenge.finish_datetime),
-            'video_example_path': self.video_example_path
-        }
+        expected_data = get_expected_data(self.challenge, self.user, self.video_example_path)
+        expected_data['members_amount'] = 1
+        expected_data['bets_sum'] = 50
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data==expected_data, True)
 
@@ -76,19 +76,9 @@ class GetDetailChallengeTests(APITestCase):
         """Tests getting detail challenge information with two members."""
         accept_challenge(self.user2, self.challenge)
         response = self.client.get(self.url)
-        expected_data = {
-            'challenge_id': self.challenge.id,
-            'name': self.challenge.name,
-            'creator': self.user.username,
-            'goal': self.challenge.goal,
-            'description': self.challenge.description,
-            'requirements': self.challenge.requirements,
-            'members_amount': 2,
-            'bet': self.challenge.bet,
-            'bets_sum': 100,
-            'finish_datetime': str(self.challenge.finish_datetime),
-            'video_example_path': self.video_example_path
-        }
+        expected_data = get_expected_data(self.challenge, self.user, self.video_example_path)
+        expected_data['members_amount'] = 2
+        expected_data['bets_sum'] = 100
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data==expected_data, True)
 
@@ -98,24 +88,14 @@ class GetDetailChallengeTests(APITestCase):
         self.challenge.is_active = False
         self.challenge.save()
         response = self.client.get(self.url)
-        expected_data = {
-            'challenge_id': self.challenge.id,
-            'name': self.challenge.name,
-            'creator': self.user.username,
-            'goal': self.challenge.goal,
-            'description': self.challenge.description,
-            'requirements': self.challenge.requirements,
-            'members_amount': 2,
-            'bet': self.challenge.bet,
-            'bets_sum': 100,
-            'finish_datetime': str(self.challenge.finish_datetime),
-            'video_example_path': self.video_example_path
-        }
+        expected_data = get_expected_data(self.challenge, self.user, self.video_example_path)
+        expected_data['members_amount'] = 2
+        expected_data['bets_sum'] = 100
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data==expected_data, True)
 
     def test_get_detail_info_of_free_challenge(self):
-        """Tests getting detail info about freee challenge."""
+        """Tests getting detail info about free challenge."""
         data_for_challenge2 = data_for_challenge.copy()
         data_for_challenge2['name'] = 'other_name'
         data_for_challenge2['bet'] = 0
@@ -126,33 +106,22 @@ class GetDetailChallengeTests(APITestCase):
         url = reverse('challenges:get_detail_challenge', kwargs=kwargs)
         response = self.client.get(url)
 
-        expected_data = {
-            'challenge_id': challenge2.id,
-            'name': challenge2.name,
-            'creator': self.user.username,
-            'goal': challenge2.goal,
-            'description': challenge2.description,
-            'requirements': challenge2.requirements,
-            'members_amount': 2,
-            'bet': challenge2.bet,
-            'bets_sum': 0,
-            'finish_datetime': challenge2.finish_datetime,
-            'video_example_path': None
-        }
+        expected_data = get_expected_data(challenge2, self.user)
+        expected_data['members_amount'] = 2
+        expected_data['bets_sum'] = 0
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data==expected_data, True)
-
 
     def test_get_detail_challenge_info_for_not_auth_user(self):
         """
         Tests getting detail challenge
-        informatoion for not authenticted user.
+        information for not authenticated user.
         """
         self.client.credentials()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_get_detail_unexisting_challenge_info(self):
+    def test_get_detail_challenge_info_that_doesnt_exist(self):
         """Tests getting information about challenge that doesn't exist."""
         kwargs = {'challenge_id': 100000000}
         url = reverse('challenges:get_detail_challenge', kwargs=kwargs)
