@@ -4,28 +4,8 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from services_for_tests.for_tests import registrate_and_activate_user, get_auth_headers, set_auth_headers
-
-
-signup_data = {
-    'first_name': 'Sasha',
-    'surname': 'Kurkin',
-    'username': 'Luk',
-    'email': 'nepetr86@bk.ru',
-    'password': '123456789',
-}
-
-login_data = {
-    'username': 'Luk',
-    'password': '123456789'
-}
-
-signup_data2 = {
-    'first_name': 'Lexa',
-    'surname': 'Bubnov',
-    'username': 'Lak',
-    'email': 'Lexa86@bk.ru',
-    'password': '123456789',
-    }
+from services_for_tests.data_for_tests import signup_data, login_data, \
+                                              signup_data2, login_data2
 
 
 class UsersListAPITests(APITestCase):

@@ -6,16 +6,9 @@ from rest_framework import status
 from users.models import User
 from users.services.token_services import TokenService
 from users.services.datetime_services import DatetimeService
+
 from services_for_tests.for_tests import registrate_user, ForTestsDateTimeService
-
-
-signup_data = {
-    'first_name': 'Sasha',
-    'surname': 'Kurkin',
-    'username': 'Luk',
-    'email': 'nepetr86@bk.ru',
-    'password': '123456789',
-}
+from services_for_tests.data_for_tests import signup_data
 
 
 class AccountActivationAPITests(APITestCase):

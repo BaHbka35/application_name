@@ -4,18 +4,11 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from users.models import User
-from services_for_tests.for_tests import registrate_and_activate_user, registrate_user
 from users.services.token_services import TokenService
 from users.services.token_signature_services import TokenSignatureService
 
-
-signup_data = {
-    'first_name': 'Sasha',
-    'surname': 'Kurkin',
-    'username': 'Luk',
-    'email': 'nepetr86@bk.ru',
-    'password': '123456789',
-}
+from services_for_tests.for_tests import registrate_and_activate_user, registrate_user
+from services_for_tests.data_for_tests import signup_data, login_data
 
 
 class LogInAPITests(APITestCase):
@@ -28,10 +21,7 @@ class LogInAPITests(APITestCase):
 
     def test_login_with_right_data(self):
         """Tests login user with right data."""
-        data = {
-            'username': 'Luk',
-            'password': '123456789'
-        }
+        data = login_data.copy()
         response = self.client.post(self.url, data, format='json')
         user = User.objects.get()
         token = TokenService.get_user_auth_token(user)
