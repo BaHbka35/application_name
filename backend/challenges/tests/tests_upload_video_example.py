@@ -101,7 +101,7 @@ class UploadVideoExampleTests(APITestCase):
         Tests uploading video example by user
         that isn't a challenge creator.
         """
-        user2 = registrate_and_activate_user(signup_data2)
+        registrate_and_activate_user(signup_data2)
         auth_headers2 = get_auth_headers(login_data2)
         set_auth_headers(self, auth_headers2)
 

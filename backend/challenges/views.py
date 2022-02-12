@@ -11,6 +11,7 @@ from .serializers import CreateChallengeSerializer, GetChallengesListSerializer,
                          GetDitailChallengeInfoSerializer, GetChallengeMembersSerializer
 from .services.challenge_services import ChallengeService
 from .services.challenge_answer_services import ChallengeAnswerService
+from .services.uploading_file_services import UploadFileService
 
 from users.services.user_services import UserService
 
@@ -64,7 +65,7 @@ class UploadVideoExampleView(APIView):
             data = {'message': 'You can\'t upload video. You aren\'t creator.'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
-        if not ChallengeService.is_video_example_file_valid(request.data):
+        if not UploadFileService.is_video_file_valid(request.data, 'video_example'):
             data = {'message': 'video file not valid.'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -150,13 +151,13 @@ class GetChallengeMembers(APIView):
 
 
 class AddAnswerOnChallenge(APIView):
-    """View for adding answero on challenge."""
+    """View for adding answer on challenge."""
 
     permission_classes = [IsAuthenticated]
     parser_class = [FileUploadParser]
 
     def put(self, request, challenge_id: int) -> Response:
-        """"""
+        """Adds answer on challenge"""
         user = request.user
 
         try:
@@ -172,7 +173,7 @@ class AddAnswerOnChallenge(APIView):
             data = {'message': 'You are not member of this challenge'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
-        if not ChallengeAnswerService.is_video_answer_file_valid(request.data):
+        if not UploadFileService.is_video_file_valid(request.data, 'video_answer'):
             data = {'message': 'video file not valid.'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 

@@ -28,13 +28,12 @@ class AddAnswerOnChallenge(APITestCase):
     def __get_challenge_answer(self):
         challenge_member = ChallengeMember.objects.get(user=self.user2, challenge=self.challenge)
         challenge_answer = ChallengeAnswer.objects.get(challenge_member=challenge_member,
-                                                          challenge=self.challenge)
+                                                       challenge=self.challenge)
         return challenge_answer
-
 
     def setUp(self):
         """"""
-        video_answer_dir = os.path.join(settings.MEDIA_ROOT, 'video_answer/')
+        video_answer_dir = os.path.join(settings.MEDIA_ROOT, 'video_answers/')
         clear_directory(video_answer_dir)
 
         user = registrate_and_activate_user(signup_data)
@@ -57,7 +56,7 @@ class AddAnswerOnChallenge(APITestCase):
         self.url = reverse('challenges:add_answer_on_challenge', kwargs=kwargs)
 
     def test_add_answer_on_challenge(self):
-        """Tests adding asnwer on challenge."""
+        """Tests adding answer on challenge."""
         accept_challenge(self.user2, self.challenge)
         response = self.client.put(self.url, data=self.data, format='multipart')
 
@@ -92,8 +91,8 @@ class AddAnswerOnChallenge(APITestCase):
         response2 = self.client.put(self.url, data=data, format='multipart')
 
         challenge_answer = self.__get_challenge_answer()
-
         amount_files_in_dir = os.listdir(self.storage_dirrectory)
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response2.status_code, status.HTTP_200_OK)
         self.assertEqual(len(amount_files_in_dir), 1)
@@ -101,7 +100,7 @@ class AddAnswerOnChallenge(APITestCase):
         self.assertEqual(challenge_answer.challenge_member.user, self.user2)
 
     def test_add_answer_for_not_existing_challenge(self):
-        """Tests adding asnswer for challenge than doesn't exist."""
+        """Tests adding answer for challenge than doesn't exist."""
         kwargs = {'challenge_id': 100000000}
         url = reverse('challenges:add_answer_on_challenge', kwargs=kwargs)
         response = self.client.put(url, data=self.data, format='multipart')

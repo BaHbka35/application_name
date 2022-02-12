@@ -23,7 +23,7 @@ class Challenge(models.Model):
     goal = models.CharField(max_length=200, verbose_name='what must be done')
 
     description = models.CharField(max_length=500,
-                                   verbose_name='challenge discription')
+                                   verbose_name='challenge description')
 
     requirements = models.CharField(
         verbose_name='requirements for how challenge must be done',
@@ -56,8 +56,8 @@ class ChallengeMember(models.Model):
         return self.user.username
 
 
-class ChallegeWinner(models.Model):
-    """User that wone challenge."""
+class ChallengeWinner(models.Model):
+    """User that won challenge."""
 
     challenge_member = models.ForeignKey(
         ChallengeMember, on_delete=models.CASCADE,
@@ -81,16 +81,16 @@ class ChallengeAnswer(models.Model):
     challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE,
                                   verbose_name='challenge')
 
-    video_answer = models.FileField(upload_to='video_answer',
-                                    verbose_name='video answer on chellange',)
+    video_answer = models.FileField(upload_to='video_answers',
+                                    verbose_name='video answer on challenge',)
 
     def __str__(self):
-        return f'asnwer from "{self.challenge_member.user.username}" \
+        return f'answer from "{self.challenge_member.user.username}" \
             for challenge "{self.challenge.name}"'
 
 
 class ChallengeBalance(models.Model):
-    """Sum of all bets of challenge memebers."""
+    """Sum of all bets of challenge members."""
 
     challenge = models.OneToOneField(Challenge, on_delete=models.CASCADE,
                                      related_name='balance')

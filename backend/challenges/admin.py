@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Challenge, ChallengeMember, ChallegeWinner,\
+from .models import Challenge, ChallengeMember, ChallengeWinner,\
                     ChallengeAnswer, ChallengeBalance
 
 @admin.register(Challenge)
@@ -20,7 +20,7 @@ class ChallengeMemberAdmin(admin.ModelAdmin):
     list_display = ('user', 'challenge',)
 
 
-@admin.register(ChallegeWinner)
+@admin.register(ChallengeWinner)
 class ChallengeWinnerAdmin(admin.ModelAdmin):
     """Setting for challenge winner admin page."""
     list_display = ('challenge_member', 'challenge',)
