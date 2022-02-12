@@ -54,9 +54,8 @@ class GetDitailChallengeInfoSerializer(BaseChallengeSerializer):
     description = serializers.CharField(max_length=500)
     requirements = serializers.CharField(max_length=500)
 
-
     def to_representation(self, instance):
-        """Add exstra fields"""
+        """Add extra fields"""
         representation = super().to_representation(instance)
         try:
             video_example_path = instance.video_example.path
@@ -64,6 +63,22 @@ class GetDitailChallengeInfoSerializer(BaseChallengeSerializer):
             video_example_path = None
         representation['video_example_path'] = video_example_path
         return representation
+
+
+class GetChallengeMembersSerializer(serializers.Serializer):
+    """Serializer for getting challenge members."""
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['user_id'] = instance.user.id
+        representation['username'] = instance.user.username
+        return representation
+
+
+
+
+
+
 
 
 
