@@ -163,18 +163,21 @@ class AddAnswerOnChallenge(APIView):
             challenge = Challenge.objects.get(id=challenge_id)
         except Challenge.DoesNotExist:
             data = {'message': 'There isn\'t challenge with given id'}
-            return Response(data=data, status=status.HTTP_404_NOT_FOUND)
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
-        challenge_member = ChallengeMember.objects.get(user=user,
-                                                       challenge=challenge)
+        try:
+            challenge_member = ChallengeMember.objects.get(user=user,
+                                                           challenge=challenge)
+        except ChallengeMember.DoesNotExist:
+            data = {'message': 'You are not member of this challenge'}
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
         if not ChallengeAnswerService.is_video_answer_file_valid(request.data):
             data = {'message': 'video file not valid.'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
         challenge_answer = ChallengeAnswer.objects.get_or_create(
             challenge_member=challenge_member, challenge=challenge)[0]
-
-        print(challenge_answer.video_answer)
 
         video_answer_file = request.data['video_answer']
         ChallengeAnswerService.update_video_answer(challenge_member, challenge_answer,
