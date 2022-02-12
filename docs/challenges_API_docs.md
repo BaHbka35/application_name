@@ -110,7 +110,6 @@ if not:
 
 **GET get_detail_challenge/challenge_id/**
 
-
 input: {}
 
 output:
@@ -139,3 +138,30 @@ if not:
 > status: 400 bad request
 
 
+
+## Get challenge member
+!!! User must be authenticated.
+
+**GET get_challenge_members/challenge_id/**
+
+input: {}
+
+output:
+
+if success:
+> status: 200 ok
+```json
+[
+  {
+    "user_id": 1,
+    "username": "Luk"
+  },
+  {
+    "user_id": 3,
+    "username": "Luk2"
+  }
+]
+```
+
+if not:
+> status: 400 bad request

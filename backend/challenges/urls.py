@@ -14,4 +14,6 @@ urlpatterns = [
          name='get_challenges_list'),
     path('get_detail_challenge/<int:challenge_id>/',
          views.GetDetailChallenge.as_view(), name='get_detail_challenge'),
+    path('get_challenge_members/<int:challenge_id>/',
+         views.GetChallengeMembers.as_view(), name='get_challenge_members'),
 ]
