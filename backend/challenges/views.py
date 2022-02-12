@@ -6,10 +6,11 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import FileUploadParser
 
-from .models import Challenge, ChallengeBalance, ChallengeMember
+from .models import Challenge, ChallengeBalance, ChallengeMember, ChallengeAnswer
 from .serializers import CreateChallengeSerializer, GetChallengesListSerializer,\
                          GetDitailChallengeInfoSerializer, GetChallengeMembersSerializer
 from .services.challenge_services import ChallengeService
+from .services.challenge_answer_services import ChallengeAnswerService
 
 from users.services.user_services import UserService
 
@@ -147,6 +148,38 @@ class GetChallengeMembers(APIView):
         challenge_members = json.loads(json.dumps(serializer.data))
         return Response(data=challenge_members, status=status.HTTP_200_OK)
 
+
+class AddAnswerOnChallenge(APIView):
+    """View for adding answero on challenge."""
+
+    permission_classes = [IsAuthenticated]
+    parser_class = [FileUploadParser]
+
+    def put(self, request, challenge_id: int) -> Response:
+        """"""
+        user = request.user
+
+        try:
+            challenge = Challenge.objects.get(id=challenge_id)
+        except Challenge.DoesNotExist:
+            data = {'message': 'There isn\'t challenge with given id'}
+            return Response(data=data, status=status.HTTP_404_NOT_FOUND)
+
+        challenge_member = ChallengeMember.objects.get(user=user,
+                                                       challenge=challenge)
+        if not ChallengeAnswerService.is_video_answer_file_valid(request.data):
+            data = {'message': 'video file not valid.'}
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+        challenge_answer = ChallengeAnswer.objects.get_or_create(
+            challenge_member=challenge_member, challenge=challenge)[0]
+
+        print(challenge_answer.video_answer)
+
+        video_answer_file = request.data['video_answer']
+        ChallengeAnswerService.update_video_answer(challenge_member, challenge_answer,
+                                                   video_answer_file)
+        return Response(status=status.HTTP_200_OK)
 
 
 
