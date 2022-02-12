@@ -2,5 +2,6 @@
 /backend/db.sqlite3
 /shlak.py
 .idea
-/backend/keys.sh
 backend/media/
+backend/.env
+**/__pycache__
