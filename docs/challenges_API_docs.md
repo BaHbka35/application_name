@@ -165,3 +165,35 @@ if success:
 
 if not:
 > status: 400 bad request
+
+
+## Add answer on challenge.
+!!! User must be authenticated.
+
+**PUT add_answer_on_challenge/challenge_id/**
+
+type = multipart/form-data
+
+you can upload only mp4 format
+
+input:
+```multipart/form-data
+{'video_example': video_file.mp4}
+```
+
+output:
+
+if success:
+> status: 200 ok
+
+if not:
+> status: 400 bad request
+
+
+
+
+
+
+
+
+
