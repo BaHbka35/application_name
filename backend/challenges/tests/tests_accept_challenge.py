@@ -30,9 +30,7 @@ class AcceptChallengeTests(APITestCase):
         auth_headers2 = get_auth_headers(login_data2)
         set_auth_headers(self, auth_headers2)
 
-        kwargs = {
-            'challenge_id': challenge.id,
-        }
+        kwargs = {'challenge_id': challenge.id}
         self.url = reverse('challenges:accept_challenge', kwargs=kwargs)
 
     def test_accept_not_free_challenge(self):
@@ -40,12 +38,11 @@ class AcceptChallengeTests(APITestCase):
         response = self.client.get(self.url)
 
         challenge = Challenge.objects.get()
-        amount_challenge_memebers = ChallengeMember.objects.filter(
-            challenge=challenge).count()
+        challenge_members = ChallengeMember.objects.filter(challenge=challenge)
         user2 = User.objects.get(id=self.user2.id)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(amount_challenge_memebers, 2)
+        self.assertEqual(len(challenge_members), 2)
         self.assertEqual(user2.balance.coins_amount, 0)
         self.assertEqual(challenge.balance.coins_amount, 100)
 
@@ -63,13 +60,12 @@ class AcceptChallengeTests(APITestCase):
 
         response = self.client.get(url)
 
-        amount_challenge_memebers = ChallengeMember.objects.filter(
-            challenge=free_challenge).count()
-        user2 = User.objects.get(id=self.user2.id)
         challenge = Challenge.objects.get(id=free_challenge.id)
+        challenge_members = ChallengeMember.objects.filter(challenge=challenge)
+        user2 = User.objects.get(id=self.user2.id)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(amount_challenge_memebers, 2)
+        self.assertEqual(len(challenge_members), 2)
         self.assertEqual(user2.balance.coins_amount, 50)
         self.assertEqual(challenge.balance.coins_amount, 0)
 
@@ -79,12 +75,11 @@ class AcceptChallengeTests(APITestCase):
         response = self.client.get(self.url)
 
         challenge = Challenge.objects.get()
-        amount_challenge_memebers = ChallengeMember.objects.filter(
-            challenge=challenge).count()
+        challenge_members = ChallengeMember.objects.filter(challenge=challenge)
         user2 = User.objects.get(id=self.user2.id)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(amount_challenge_memebers, 1)
+        self.assertEqual(len(challenge_members), 1)
         self.assertEqual(user2.balance.coins_amount, 50)
         self.assertEqual(challenge.balance.coins_amount, 50)
 
@@ -96,19 +91,18 @@ class AcceptChallengeTests(APITestCase):
         response = self.client.get(self.url)
 
         challenge = Challenge.objects.get()
-        amount_challenge_memebers = ChallengeMember.objects.filter(
-            challenge=challenge).count()
+        challenge_members = ChallengeMember.objects.filter(challenge=challenge)
         user2 = User.objects.get(id=self.user2.id)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(amount_challenge_memebers, 1)
+        self.assertEqual(len(challenge_members), 1)
         self.assertEqual(user2.balance.coins_amount, 10)
         self.assertEqual(challenge.balance.coins_amount, 50)
 
     def test_accept_challenge_that_was_already_accepted(self):
         """
         Tests accepting challenge by user
-        that have acccepted this challenge.
+        that have accepted this challenge.
         """
         self.user2.balance.coins_amount = 100
         self.user2.balance.save()
@@ -117,13 +111,12 @@ class AcceptChallengeTests(APITestCase):
         response2 = self.client.get(self.url)
 
         challenge = Challenge.objects.get()
-        amount_challenge_memebers = ChallengeMember.objects.filter(
-            challenge=challenge).count()
+        challenge_members = ChallengeMember.objects.filter(challenge=challenge)
         user2 = User.objects.get(id=self.user2.id)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response2.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(amount_challenge_memebers, 2)
+        self.assertEqual(len(challenge_members), 2)
         self.assertEqual(user2.balance.coins_amount, 50)
         self.assertEqual(challenge.balance.coins_amount, 100)
 
@@ -132,10 +125,18 @@ class AcceptChallengeTests(APITestCase):
         challenge = Challenge.objects.get()
         challenge.is_active = False
         challenge.save()
-
         response = self.client.get(self.url)
+        challenge = Challenge.objects.get()
+        challenge_members = ChallengeMember.objects.filter(challenge=challenge)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(len(challenge_members), 1)
 
+    def test_accept_challenge_that_does_not_exist(self):
+        """Tests accepting challenge that doesn't exist"""
+        kwargs = {'challenge_id': 2034}
+        url = reverse('challenges:accept_challenge', kwargs=kwargs)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 

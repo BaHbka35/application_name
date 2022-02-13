@@ -12,6 +12,7 @@ from .serializers import CreateChallengeSerializer, GetChallengesListSerializer,
 from .services.challenge_services import ChallengeService
 from .services.challenge_answer_services import ChallengeAnswerService
 from .services.uploading_file_services import UploadFileService
+from .services.challenge_member_services import ChallengeMemberService
 
 from users.services.user_services import UserService
 
@@ -59,7 +60,10 @@ class UploadVideoExampleView(APIView):
     def put(self, request, challenge_id: int) -> Response:
         """Set video example for challenge."""
         user = request.user
-        challenge = Challenge.objects.get(id=challenge_id)
+        challenge = ChallengeService.get_challenge(challenge_id)
+        if not challenge:
+            data = {'message': 'There isn\'t challenge with given id'}
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
         if not challenge.creator == user:
             data = {'message': 'You can\'t upload video. You aren\'t creator.'}
@@ -82,14 +86,18 @@ class AcceptChallengeView(APIView):
 
     def get(self, request, challenge_id: int) -> Response:
         """Makes the user a member of challenge."""
-        challenge = Challenge.objects.get(id=challenge_id)
         user = request.user
+        challenge = ChallengeService.get_challenge(challenge_id)
+        if not challenge:
+            data = {'message': 'There isn\'t challenge with given id'}
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
         if not challenge.is_active:
             data = {'message': 'this challenge was finished.'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
-        if ChallengeMember.objects.all().filter(user=user, challenge=challenge):
+        if ChallengeMemberService.has_user_already_accepted_this_challenge(
+               user=user, challenge=challenge):
             data = {'message': 'user have already accepted this challenge'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -123,12 +131,11 @@ class GetDetailChallenge(APIView):
 
     def get(self, request, challenge_id: int) -> Response:
         """Return detail information about challenge."""
-        try:
-            queryset = Challenge.objects.get(id=challenge_id)
-        except Challenge.DoesNotExist:
+        challenge = ChallengeService.get_challenge(challenge_id)
+        if not challenge:
             data = {'message': 'There isn\'t challenge with given id'}
-            return Response(data=data, status=status.HTTP_404_NOT_FOUND)
-        serializer = GetDitailChallengeInfoSerializer(queryset)
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+        serializer = GetDitailChallengeInfoSerializer(challenge)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
@@ -139,11 +146,10 @@ class GetChallengeMembers(APIView):
 
     def get(self, request, challenge_id: int) -> Response:
         """Returns list challenge members."""
-        try:
-            challenge = Challenge.objects.get(id=challenge_id)
-        except Challenge.DoesNotExist:
+        challenge = ChallengeService.get_challenge(challenge_id)
+        if not challenge:
             data = {'message': 'There isn\'t challenge with given id'}
-            return Response(data=data, status=status.HTTP_404_NOT_FOUND)
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
         queryset = ChallengeMember.objects.all().filter(challenge=challenge)
         serializer = GetChallengeMembersSerializer(queryset, many=True)
         challenge_members = json.loads(json.dumps(serializer.data))
@@ -159,17 +165,17 @@ class AddAnswerOnChallenge(APIView):
     def put(self, request, challenge_id: int) -> Response:
         """Adds answer on challenge"""
         user = request.user
-
-        try:
-            challenge = Challenge.objects.get(id=challenge_id)
-        except Challenge.DoesNotExist:
+        challenge = ChallengeService.get_challenge(challenge_id)
+        if not challenge:
             data = {'message': 'There isn\'t challenge with given id'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            challenge_member = ChallengeMember.objects.get(user=user,
-                                                           challenge=challenge)
-        except ChallengeMember.DoesNotExist:
+        if not challenge.is_active:
+            data = {'message': 'this challenge was finished.'}
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+        challenge_member = ChallengeMemberService.get_challenge_member(user, challenge)
+        if not challenge_member:
             data = {'message': 'You are not member of this challenge'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -177,9 +183,8 @@ class AddAnswerOnChallenge(APIView):
             data = {'message': 'video file not valid.'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
-        challenge_answer = ChallengeAnswer.objects.get_or_create(
-            challenge_member=challenge_member, challenge=challenge)[0]
-
+        challenge_answer = ChallengeAnswerService.get_challenge_answer(
+            challenge_member=challenge_member, challenge=challenge)
         video_answer_file = request.data['video_answer']
         ChallengeAnswerService.update_video_answer(challenge_member, challenge_answer,
                                                    video_answer_file)

@@ -126,7 +126,7 @@ class GetDetailChallengeTests(APITestCase):
         kwargs = {'challenge_id': 100000000}
         url = reverse('challenges:get_detail_challenge', kwargs=kwargs)
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 

@@ -9,7 +9,7 @@ from django.core.files import File
 from rest_framework.test import APITestCase
 from rest_framework import status
 
-from challenges.models import ChallengeMember, ChallengeAnswer
+from challenges.models import Challenge, ChallengeMember, ChallengeAnswer
 
 from services_for_tests.for_tests import registrate_and_activate_user, \
                                          get_auth_headers, set_auth_headers,\
@@ -33,20 +33,19 @@ class AddAnswerOnChallenge(APITestCase):
 
     def setUp(self):
         """"""
-        video_answer_dir = os.path.join(settings.MEDIA_ROOT, 'video_answers/')
-        clear_directory(video_answer_dir)
+        self.video_answer_dir = os.path.join(settings.MEDIA_ROOT, 'video_answers/')
+        clear_directory(self.video_answer_dir)
 
         user = registrate_and_activate_user(signup_data)
         self.challenge = create_challenge(data_for_challenge, user)
 
-        file_path = os.path.join(settings.MEDIA_ROOT, 'video_source/111.mp4')
-        file = File(open(file_path, 'rb'))
-        uploaded_file = SimpleUploadedFile('111.mp4', file.read(),
+        self.file_name = '111.mp4'
+        self.source_file_path = os.path.join(settings.MEDIA_ROOT, f'video_source/{self.file_name}')
+        file = File(open(self.source_file_path, 'rb'))
+        uploaded_file = SimpleUploadedFile(self.file_name, file.read(),
                                            content_type='multipart/form-data')
-
-        self.data = {'video_answer': uploaded_file}
-
-        self.storage_dirrectory = os.path.join(settings.MEDIA_ROOT, video_answer_dir)
+        self.video_answer_field_name = 'video_answer'
+        self.data = {self.video_answer_field_name: uploaded_file}
 
         self.user2 = registrate_and_activate_user(signup_data2)
         auth_headers2 = get_auth_headers(login_data2)
@@ -62,9 +61,9 @@ class AddAnswerOnChallenge(APITestCase):
 
         challenge_answer = self.__get_challenge_answer()
 
-        amount_files_in_dir = os.listdir(self.storage_dirrectory)
+        files_in_dir = os.listdir(self.video_answer_dir)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(amount_files_in_dir), 1)
+        self.assertEqual(len(files_in_dir), 1)
         self.assertEqual(challenge_answer.challenge, self.challenge)
         self.assertEqual(challenge_answer.challenge_member.user, self.user2)
 
@@ -73,29 +72,28 @@ class AddAnswerOnChallenge(APITestCase):
         accept_challenge(self.user2, self.challenge)
         self.client.credentials()
         response = self.client.put(self.url, data=self.data, format='multipart')
-        amount_files_in_dir = os.listdir(self.storage_dirrectory)
+        files_in_dir = os.listdir(self.video_answer_dir)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(len(amount_files_in_dir), 0)
+        self.assertEqual(len(files_in_dir), 0)
 
     def test_add_answer_on_challenge_in_second_time(self):
         """Tests second adding answer on challenge by same user."""
         accept_challenge(self.user2, self.challenge)
         response = self.client.put(self.url, data=self.data, format='multipart')
 
-        file_path = os.path.join(settings.MEDIA_ROOT, 'video_source/111.mp4')
-        file = File(open(file_path, 'rb'))
-        uploaded_file = SimpleUploadedFile('111.mp4', file.read(),
+        file = File(open(self.source_file_path, 'rb'))
+        uploaded_file = SimpleUploadedFile(self.file_name, file.read(),
                                            content_type='multipart/form-data')
-        data = {'video_answer': uploaded_file}
+        data = {self.video_answer_field_name: uploaded_file}
 
         response2 = self.client.put(self.url, data=data, format='multipart')
 
         challenge_answer = self.__get_challenge_answer()
-        amount_files_in_dir = os.listdir(self.storage_dirrectory)
+        files_in_dir = os.listdir(self.video_answer_dir)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response2.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(amount_files_in_dir), 1)
+        self.assertEqual(len(files_in_dir), 1)
         self.assertEqual(challenge_answer.challenge, self.challenge)
         self.assertEqual(challenge_answer.challenge_member.user, self.user2)
 
@@ -105,9 +103,9 @@ class AddAnswerOnChallenge(APITestCase):
         url = reverse('challenges:add_answer_on_challenge', kwargs=kwargs)
         response = self.client.put(url, data=self.data, format='multipart')
 
-        amount_files_in_dir = os.listdir(self.storage_dirrectory)
+        files_in_dir = os.listdir(self.video_answer_dir)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(len(amount_files_in_dir), 0)
+        self.assertEqual(len(files_in_dir), 0)
 
     def test_add_answer_on_challenge_by_not_member_of_challenge(self):
         """
@@ -115,9 +113,19 @@ class AddAnswerOnChallenge(APITestCase):
         user that isn't a member of this challenge.
         """
         response = self.client.put(self.url, data=self.data, format='multipart')
-        amount_files_in_dir = os.listdir(self.storage_dirrectory)
+        files_in_dir = os.listdir(self.video_answer_dir)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(len(amount_files_in_dir), 0)
+        self.assertEqual(len(files_in_dir), 0)
+
+    def test_add_answer_on_finished_challenge(self):
+        """Tests adding answer on challenge that has already finished."""
+        challenge = Challenge.objects.get()
+        challenge.is_active = False
+        challenge.save()
+        response = self.client.put(self.url, data=self.data, format='multipart')
+        files_in_dir = os.listdir(self.video_answer_dir)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(len(files_in_dir), 0)
 
 
 

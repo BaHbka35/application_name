@@ -1,5 +1,7 @@
 import os
 
+from typing import Optional
+
 from django.conf import settings
 
 from challenges.models import Challenge
@@ -58,6 +60,14 @@ class ChallengeService:
     def is_challenge_free(challenge: Challenge) -> bool:
         """Checks is challenge free for accept it or not."""
         return challenge.bet == 0
+
+    @staticmethod
+    def get_challenge(challenge_id: int) -> Optional[Challenge]:
+        """Returns challenge object"""
+        try:
+            return Challenge.objects.get(id=challenge_id)
+        except Challenge.DoesNotExist:
+            return None
 
 
 

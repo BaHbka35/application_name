@@ -2,12 +2,18 @@ import os
 
 from django.conf import settings
 
-from challenges.models import ChallengeMember, ChallengeAnswer
+from challenges.models import Challenge, ChallengeMember, ChallengeAnswer
 
 from .services import delete_existing_file
 
 
 class ChallengeAnswerService:
+
+    @classmethod
+    def get_challenge_answer(cls, challenge_member: ChallengeMember, challenge: Challenge):
+        """"""
+        return ChallengeAnswer.objects.get_or_create(challenge_member=challenge_member,
+                                                     challenge=challenge)[0]
 
     @classmethod
     def update_video_answer(cls, member: ChallengeMember, challenge_answer: ChallengeAnswer,

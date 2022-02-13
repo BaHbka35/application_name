@@ -24,21 +24,20 @@ class UploadVideoExampleTests(APITestCase):
 
     def setUp(self):
         """Registrate, activate user."""
-        video_example_dir = os.path.join(settings.MEDIA_ROOT, 'video_examples/')
-        clear_directory(video_example_dir)
+        self.video_example_dir = os.path.join(settings.MEDIA_ROOT, 'video_examples/')
+        clear_directory(self.video_example_dir)
 
         user = registrate_and_activate_user(signup_data)
         challenge = create_challenge(data_for_challenge, user)
 
-        file_path = os.path.join(settings.MEDIA_ROOT, 'video_source/111.mp4')
+        source_file_name = '111.mp4'
+        source_file_path = os.path.join(settings.MEDIA_ROOT, f'video_source/{source_file_name}')
 
-        file = File(open(file_path, 'rb'))
-        uploaded_file = SimpleUploadedFile('111.mp4', file.read(),
+        source_file = File(open(source_file_path, 'rb'))
+        uploaded_file = SimpleUploadedFile(source_file_name, source_file.read(),
                                            content_type='multipart/form-data')
-
-        self.data = {'video_example': uploaded_file}
-
-        self.storage_dirrectory = os.path.join(settings.MEDIA_ROOT, video_example_dir)
+        self.video_example_field_name = 'video_example'
+        self.data = {self.video_example_field_name: uploaded_file}
 
         auth_headers = get_auth_headers(login_data)
         set_auth_headers(self, auth_headers)
@@ -50,18 +49,18 @@ class UploadVideoExampleTests(APITestCase):
         """Tests uploading video when all is good."""
         response = self.client.put(self.url, data=self.data,
                                    format='multipart')
-        amount_files_in_dir = os.listdir(self.storage_dirrectory)
+        files_in_dir = os.listdir(self.video_example_dir)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(amount_files_in_dir), 1)
+        self.assertEqual(len(files_in_dir), 1)
 
     def test_upload_video_of_user_that_not_auth(self):
         """Tests upload video example of user that not auth."""
         self.client.credentials()
         response = self.client.put(self.url, data=self.data,
                                    format='multipart')
-        amount_files_in_dir = os.listdir(self.storage_dirrectory)
+        files_in_dir = os.listdir(self.video_example_dir)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(len(amount_files_in_dir), 0)
+        self.assertEqual(len(files_in_dir), 0)
 
     def test_upload_video_when_challenge_already_has_video_example(self):
         """Tests uploading video when challenge already has video example."""
@@ -72,29 +71,29 @@ class UploadVideoExampleTests(APITestCase):
         file = File(open(file_path, 'rb'))
         uploaded_file = SimpleUploadedFile('111.mp4', file.read(),
                                            content_type='multipart/form-data')
-        data = {'video_example': uploaded_file}
+        data = {self.video_example_field_name: uploaded_file}
         response2 = self.client.put(self.url, data=data,
                                     format='multipart')
-        amount_files_in_dir = os.listdir(self.storage_dirrectory)
+        files_in_dir = os.listdir(self.video_example_dir)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response2.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(amount_files_in_dir), 1)
+        self.assertEqual(len(files_in_dir), 1)
 
     def test_send_empty_json(self):
         """Tests sending empty json file."""
         data = {}
         response = self.client.put(self.url, data=data, format='multipart')
-        amount_files_in_dir = os.listdir(self.storage_dirrectory)
+        files_in_dir = os.listdir(self.video_example_dir)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(len(amount_files_in_dir), 0)
+        self.assertEqual(len(files_in_dir), 0)
 
     def test_send_json_without_video_file(self):
         """Tests sending json without video file."""
-        data = {'video_example': ''}
+        data = {self.video_example_field_name: ''}
         response = self.client.put(self.url, data=data, format='multipart')
-        amount_files_in_dir = os.listdir(self.storage_dirrectory)
+        files_in_dir = os.listdir(self.video_example_dir)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(len(amount_files_in_dir), 0)
+        self.assertEqual(len(files_in_dir), 0)
 
     def test_upload_video_example_by_user_who_is_not_a_creator(self):
         """
@@ -107,9 +106,18 @@ class UploadVideoExampleTests(APITestCase):
 
         response = self.client.put(self.url, data=self.data,
                                    format='multipart')
+        files_in_dir = os.listdir(self.video_example_dir)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(len(files_in_dir), 0)
 
-
+    def test_upload_video_example_for_challenge_that_does_not_exist(self):
+        """Tests uploading video example with challenge_id that doesn't exist."""
+        kwargs = {'challenge_id': 348}
+        url = reverse('challenges:upload_video_example', kwargs=kwargs)
+        response = self.client.put(url, data=self.data, format='multipart')
+        files_in_dir = os.listdir(self.video_example_dir)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(len(files_in_dir), 0)
 
 
 
