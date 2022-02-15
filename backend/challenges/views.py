@@ -8,7 +8,8 @@ from rest_framework.parsers import FileUploadParser
 
 from .models import Challenge, ChallengeBalance, ChallengeMember, ChallengeAnswer
 from .serializers import CreateChallengeSerializer, GetChallengesListSerializer,\
-                         GetDitailChallengeInfoSerializer, GetChallengeMembersSerializer
+                         GetDitailChallengeInfoSerializer, GetChallengeMembersSerializer,\
+                         GetChallengeAnswersSerializer
 from .services.challenge_services import ChallengeService
 from .services.challenge_answer_services import ChallengeAnswerService
 from .services.uploading_file_services import UploadFileService
@@ -124,7 +125,7 @@ class GetChallengesListView(APIView):
         return Response(data=challenges_list, status=status.HTTP_200_OK)
 
 
-class GetDetailChallenge(APIView):
+class GetDetailChallengeView(APIView):
     """View for getting detail information about specific challenge."""
 
     permission_classes = [IsAuthenticated]
@@ -139,7 +140,7 @@ class GetDetailChallenge(APIView):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
-class GetChallengeMembers(APIView):
+class GetChallengeMembersView(APIView):
     """View for getting challenge members."""
 
     permission_classes = [IsAuthenticated]
@@ -156,7 +157,7 @@ class GetChallengeMembers(APIView):
         return Response(data=challenge_members, status=status.HTTP_200_OK)
 
 
-class AddAnswerOnChallenge(APIView):
+class AddAnswerOnChallengeView(APIView):
     """View for adding answer on challenge."""
 
     permission_classes = [IsAuthenticated]
@@ -189,6 +190,59 @@ class AddAnswerOnChallenge(APIView):
         ChallengeAnswerService.update_video_answer(challenge_member, challenge_answer,
                                                    video_answer_file)
         return Response(status=status.HTTP_200_OK)
+
+
+class GetChallengeAnswersView(APIView):
+    """"""
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, challenge_id: int) -> Response:
+        """"""
+        user = request.user
+        challenge = ChallengeService.get_challenge(challenge_id)
+        if not challenge:
+            data = {'message': 'There isn\'t challenge with given id'}
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+        challenge_member = ChallengeMemberService.get_challenge_member(user, challenge)
+        if not challenge_member:
+            data = {'message': 'You are not member of this challenge'}
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+        if challenge.is_active:
+
+            user_challenge_answer = ChallengeAnswerService\
+                .get_challenge_answer_by_current_user(
+                    challenge=challenge, challenge_member=challenge_member)
+            serializer = GetChallengeAnswersSerializer(user_challenge_answer)
+            data_for_response = serializer.data
+        else:
+            all_challenge_answers = ChallengeAnswer.objects.filter(
+                challenge=challenge)
+            serializer = GetChallengeAnswersSerializer(all_challenge_answers,
+                                                       many=True)
+            data_for_response = json.loads(json.dumps(serializer.data))
+
+        return Response(data=data_for_response, status=status.HTTP_200_OK)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

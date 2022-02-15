@@ -33,7 +33,7 @@ class AddAnswerOnChallenge(APITestCase):
 
     def setUp(self):
         """"""
-        self.video_answer_dir = os.path.join(settings.MEDIA_ROOT, 'video_answers/')
+        self.video_answer_dir = os.path.join(settings.MEDIA_ROOT, settings.CHALLENGE_ANSWERS_DIR)
         clear_directory(self.video_answer_dir)
 
         user = registrate_and_activate_user(signup_data)

@@ -193,6 +193,46 @@ if not:
 > status: 400 bad request
 
 
+## Get challenge answers
+!!! User must be authenticated.
+
+**GET get_challenge_answers/challenge_id/**
+
+input: {}
+
+output:
+
+if success:
+> status: 200 ok
+
+if challenge was finished you receive all answer of this challenge
+```json
+[
+  {
+    "challenge_member": "Luk",
+    "video_answer_path": "/media/challenge_answers/2_1.mp4"
+  },
+  {
+    "challenge_member": "Luk2",
+    "video_answer_path": "/media/challenge_answers/3_1.mp4"
+  }
+]
+```
+
+if challenge is active you receive only you answer
+
+```json
+{
+  "challenge_member": "Luk",
+  "video_answer_path": "/media/challenge_answers/2_1.mp4"
+}
+```
+
+if not:
+> status: 400 bad request
+
+
+
 
 
 

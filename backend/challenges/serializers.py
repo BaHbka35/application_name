@@ -78,8 +78,20 @@ class GetChallengeMembersSerializer(serializers.Serializer):
         return representation
 
 
+class GetChallengeAnswersSerializer(serializers.Serializer):
+    """Serializer for getting challenge answers."""
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['challenge_member'] = instance.challenge_member.user.username
 
+        file_name = instance.video_answer.name
+        if file_name:
+            video_answer_path = settings.MEDIA_URL + file_name
+        else:
+            video_answer_path = None
+        representation['video_answer_path'] = video_answer_path
+        return representation
 
 
 

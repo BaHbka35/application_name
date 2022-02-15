@@ -82,12 +82,12 @@ class ChallengeAnswer(models.Model):
     challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE,
                                   verbose_name='challenge')
 
-    video_answer = models.FileField(upload_to='video_answers',
+    video_answer = models.FileField(upload_to=settings.CHALLENGE_ANSWERS_DIR,
                                     verbose_name='video answer on challenge',)
 
     def __str__(self):
-        return f'answer from "{self.challenge_member.user.username}" \
-            for challenge "{self.challenge.name}"'
+        return (f'answer from "{self.challenge_member.user.username}" ' +
+            f'for challenge "{self.challenge.name}"')
 
 
 class ChallengeBalance(models.Model):
