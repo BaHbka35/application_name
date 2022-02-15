@@ -11,8 +11,8 @@ input:
 {
 "name": "challenge_name",
 "finish_datetime": "2023-01-30 18:25:43",
-"goal": "make 20 pushups in 10 seconds",
-"description": "you mush make 20 pushups in 10 seconds and smth else",
+"goal": "make 20 push ups in 10 seconds",
+"description": "you mush make 20 push ups in 10 seconds and smth else",
 "requirements": "stopwatch must be seen on video",
 "bet": 50
 }
@@ -80,7 +80,7 @@ if success:
 [
   {
     "name": "challenge_name2",
-    "goal": "make 20 pushups in 10 seconds",
+    "goal": "make 20 push ups in 10 seconds",
     "bet": 0,
     "finish_datetime": "2023-02-02 18:25:43",
     "challenge_id": 5,
@@ -90,7 +90,7 @@ if success:
   },
   {
     "name": "challenge_name",
-    "goal": "make 20 pushups in 10 seconds",
+    "goal": "make 20 push ups in 10 seconds",
     "bet": 50,
     "finish_datetime": "2023-02-02 18:25:43",
     "challenge_id": 6,
@@ -119,23 +119,26 @@ if success:
 ```json
 {
   "name": "challenge_name2",
-  "goal": "make 20 pushups in 10 seconds",
+  "goal": "make 20 push ups in 10 seconds",
   "bet": 0,
   "finish_datetime": "2023-02-02 18:25:43",
-  "description": "you mush make 20 pushups in 10 seconds",
+  "description": "you mush make 20 push ups in 10 seconds",
   "requirements": "stopwatch must be seen on video",
   "challenge_id": 5,
   "creator": "Luk",
   "members_amount": 2,
   "bets_sum": 0,
-  "video_example_path": "/home/user/application_name/backend/media/video_examples/3_5.mp4"
+  "video_example_path": "/media/video_examples/3_5.mp4"
 }
 ```
 
-If challenge hasn't video example field "video_example_path" will be None
-
 if not:
 > status: 400 bad request
+
+video_link = domain + video_example_path
+
+If challenge hasn't video example field "video_example_path" will be None
+
 
 
 

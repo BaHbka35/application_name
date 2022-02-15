@@ -137,7 +137,7 @@ MEDIA_URL = '/media/'
 
 
 
-
+VIDEO_EXAMPLES_DIR = 'video_examples/'
 
 
 

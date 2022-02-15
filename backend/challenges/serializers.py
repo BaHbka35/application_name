@@ -1,5 +1,7 @@
 import datetime
 
+from django.conf import settings
+
 from rest_framework import serializers
 
 from .models import ChallengeMember
@@ -57,9 +59,10 @@ class GetDitailChallengeInfoSerializer(BaseChallengeSerializer):
     def to_representation(self, instance):
         """Add extra fields"""
         representation = super().to_representation(instance)
-        try:
-            video_example_path = instance.video_example.path
-        except ValueError:
+        file_name = instance.video_example.name
+        if file_name:
+            video_example_path = settings.MEDIA_URL + file_name
+        else:
             video_example_path = None
         representation['video_example_path'] = video_example_path
         return representation

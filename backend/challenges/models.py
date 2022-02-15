@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.core.validators import FileExtensionValidator
 
@@ -30,7 +31,7 @@ class Challenge(models.Model):
         max_length=500)
 
     video_example = models.FileField(
-        upload_to='video_examples', verbose_name='example of perform',
+        upload_to=settings.VIDEO_EXAMPLES_DIR, verbose_name='example of perform',
         validators=[FileExtensionValidator(allowed_extensions=['mp4'])],
         blank=True, null=True)
 
