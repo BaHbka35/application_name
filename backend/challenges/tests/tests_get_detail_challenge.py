@@ -19,7 +19,7 @@ from services_for_tests.data_for_tests import signup_data, login_data, \
                                               data_for_challenge
 
 
-def get_expected_data(challenge: Challenge, user: User, file_path: Optional[str] = None) -> dict:
+def get_expected_data(challenge: Challenge, user: User, video_link: Optional[str] = None) -> dict:
     expected_data = {
         'challenge_id': challenge.id,
         'name': challenge.name,
@@ -31,13 +31,13 @@ def get_expected_data(challenge: Challenge, user: User, file_path: Optional[str]
         'bet': challenge.bet,
         'bets_sum': None,
         'finish_datetime': str(challenge.finish_datetime),
-        'video_example_path': file_path
+        'video_example_path': video_link
     }
     return expected_data
 
 
 @override_settings(MEDIA_ROOT=os.path.join(settings.MEDIA_ROOT, 'test'),
-                   MEDIA_URL='/media/test')
+                   MEDIA_URL='/media/test/')
 class GetDetailChallengeTests(APITestCase):
     """
     Tests for testing getting detail
@@ -46,7 +46,7 @@ class GetDetailChallengeTests(APITestCase):
 
     def setUp(self):
         """"""
-        video_example_dir = os.path.join(settings.MEDIA_ROOT, 'video_examples/')
+        video_example_dir = os.path.join(settings.MEDIA_ROOT, settings.VIDEO_EXAMPLES_DIR)
         clear_directory(video_example_dir)
 
         self.user = registrate_and_activate_user(signup_data)
@@ -54,7 +54,7 @@ class GetDetailChallengeTests(APITestCase):
 
         upload_video_for_challenge(self.user, self.challenge, settings.MEDIA_ROOT)
         self.challenge = Challenge.objects.get(id=self.challenge.id)
-        self.video_example_path = self.challenge.video_example.path
+        self.video_example_path = settings.MEDIA_URL + self.challenge.video_example.name
 
         self.user2 = registrate_and_activate_user(signup_data2)
         auth_headers2 = get_auth_headers(login_data2)
