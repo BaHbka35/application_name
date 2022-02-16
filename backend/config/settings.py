@@ -2,8 +2,12 @@ import os
 import os.path
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 SECRET_KEY = 'django-insecure-#es(wmwyn7jxsjq-=#@whj&5_60boh@8q+qhn+0*ehh@h+681f'
 SECRET_KEY_BYTES = SECRET_KEY.encode()
@@ -65,7 +69,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
-
 
 DATABASES = {
     'default': {
