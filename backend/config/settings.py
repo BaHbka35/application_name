@@ -137,7 +137,8 @@ MEDIA_URL = '/media/'
 
 
 
-
+VIDEO_EXAMPLES_DIR = 'video_examples/'
+CHALLENGE_ANSWERS_DIR = 'challenge_answers/'
 
 
 

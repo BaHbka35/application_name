@@ -10,8 +10,9 @@ from users.services.datetime_services import DatetimeService
 from users.services.token_services import TokenService
 from users.services.token_signature_services import TokenSignatureService
 
-from challenges.models import Challenge, ChallengeBalance, ChallengeMember
+from challenges.models import Challenge, ChallengeBalance, ChallengeMember, ChallengeAnswer
 from challenges.services.challenge_services import ChallengeService
+from challenges.services.challenge_answer_services import ChallengeAnswerService
 
 
 def registrate_user(signup_data: dict) -> User:
@@ -64,7 +65,7 @@ def accept_challenge(user: User, challenge: Challenge) -> ChallengeMember:
 
 
 def upload_video_for_challenge(user: User, challenge: Challenge,
-                               MEDIA_ROOT: str):
+                               MEDIA_ROOT: str) -> None:
     """Upload video for challenge."""
     file_path = os.path.join(MEDIA_ROOT, 'video_source/111.mp4')
 
@@ -82,6 +83,15 @@ def clear_directory(directory: str) -> None:
         shutil.rmtree(directory)
         os.makedirs(directory)
 
+def add_answer_on_challenge(challenge_member: ChallengeMember, challenge: Challenge,
+                            video_answer_file: '') -> ChallengeAnswer:
+    challenge_answer = ChallengeAnswerService.get_challenge_answer(
+        challenge_member=challenge_member, challenge=challenge)
+    ChallengeAnswerService.update_video_answer(challenge_member, challenge_answer,
+                                               video_answer_file)
+    challenge_answer = ChallengeAnswerService.get_challenge_answer(
+        challenge_member=challenge_member, challenge=challenge)
+    return challenge_answer
 
 class ForTestsDateTimeService(DatetimeService):
     """
