@@ -1,8 +1,15 @@
 version: '3.7'
 
 services:
+  db:
+    image: "postgres:14"
+    container_name: postgresql
+    volumes:
+      - ./db/:/var/lib/postgresql/data
+    env_file:
+      - ./.env
   web:
-    image: drf_application 
+    build: .
     container_name: drf_application
     command: bash entrypoint.sh
     volumes:
