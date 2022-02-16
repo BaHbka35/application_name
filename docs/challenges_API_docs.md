@@ -222,10 +222,12 @@ if challenge was finished you receive all answer of this challenge
 if challenge is active you receive only you answer
 
 ```json
-{
-  "challenge_member": "Luk",
-  "video_answer_path": "/media/challenge_answers/2_1.mp4"
-}
+[
+  {
+    "challenge_member": "Luk",
+    "video_answer_path": "/media/challenge_answers/2_1.mp4"
+  }
+]
 ```
 
 if not:

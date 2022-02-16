@@ -82,6 +82,7 @@ class GetChallengeAnswersTests(APITestCase):
         """Tests getting challenge asnwers when challenge is active"""
         response = self.client.get(self.url)
         expected_data = get_expected_data(self.user2, self.video_example_path2)
+        expected_data = [expected_data]
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data==expected_data, True)
@@ -159,7 +160,7 @@ class GetChallengeAnswersTests(APITestCase):
         url = reverse('challenges:get_challenge_answers', kwargs=kwargs)
         response = self.client.get(url)
 
-        expected_data = {}
+        expected_data = []
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data==expected_data, True)

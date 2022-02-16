@@ -193,56 +193,33 @@ class AddAnswerOnChallengeView(APIView):
 
 
 class GetChallengeAnswersView(APIView):
-    """"""
+    """View for getting challenge answers."""
 
     permission_classes = [IsAuthenticated]
 
     def get(self, request, challenge_id: int) -> Response:
-        """"""
+        """
+        If challenge is active returns only answer that belongs
+        to current member else return all answers of challenge
+        """
         user = request.user
         challenge = ChallengeService.get_challenge(challenge_id)
         if not challenge:
             data = {'message': 'There isn\'t challenge with given id'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
-        challenge_member = ChallengeMemberService.get_challenge_member(user, challenge)
+        challenge_member = ChallengeMemberService.get_challenge_member(
+            user, challenge)
         if not challenge_member:
             data = {'message': 'You are not member of this challenge'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
-        if challenge.is_active:
-
-            user_challenge_answer = ChallengeAnswerService\
-                .get_challenge_answer_by_current_user(
-                    challenge=challenge, challenge_member=challenge_member)
-            serializer = GetChallengeAnswersSerializer(user_challenge_answer)
-            data_for_response = serializer.data
-        else:
-            all_challenge_answers = ChallengeAnswer.objects.filter(
-                challenge=challenge)
-            serializer = GetChallengeAnswersSerializer(all_challenge_answers,
-                                                       many=True)
-            data_for_response = json.loads(json.dumps(serializer.data))
+        challenge_answers = ChallengeAnswerService.get_challenge_answers(
+            challenge, challenge_member)
+        serializer = GetChallengeAnswersSerializer(challenge_answers, many=True)
+        data_for_response = json.loads(json.dumps(serializer.data))
 
         return Response(data=data_for_response, status=status.HTTP_200_OK)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

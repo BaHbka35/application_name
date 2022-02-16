@@ -1,5 +1,7 @@
 import datetime
 
+from collections import OrderedDict
+
 from django.conf import settings
 
 from rest_framework import serializers
@@ -31,7 +33,7 @@ class BaseChallengeSerializer(serializers.Serializer):
     bet = serializers.IntegerField(min_value=0)
     finish_datetime = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
 
-    def to_representation(self, instance):
+    def to_representation(self, instance) -> OrderedDict:
         """Adds extra field"""
         representation = super().to_representation(instance)
         user = instance.creator
@@ -56,7 +58,7 @@ class GetDitailChallengeInfoSerializer(BaseChallengeSerializer):
     description = serializers.CharField(max_length=500)
     requirements = serializers.CharField(max_length=500)
 
-    def to_representation(self, instance):
+    def to_representation(self, instance) -> OrderedDict:
         """Add extra fields"""
         representation = super().to_representation(instance)
         file_name = instance.video_example.name
@@ -71,7 +73,7 @@ class GetDitailChallengeInfoSerializer(BaseChallengeSerializer):
 class GetChallengeMembersSerializer(serializers.Serializer):
     """Serializer for getting challenge members."""
 
-    def to_representation(self, instance):
+    def to_representation(self, instance) -> OrderedDict:
         representation = super().to_representation(instance)
         representation['user_id'] = instance.user.id
         representation['username'] = instance.user.username
@@ -81,7 +83,7 @@ class GetChallengeMembersSerializer(serializers.Serializer):
 class GetChallengeAnswersSerializer(serializers.Serializer):
     """Serializer for getting challenge answers."""
 
-    def to_representation(self, instance):
+    def to_representation(self, instance) -> OrderedDict:
         representation = super().to_representation(instance)
         representation['challenge_member'] = instance.challenge_member.user.username
 
