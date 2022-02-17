@@ -17,8 +17,6 @@ from .services.challenge_member_services import ChallengeMemberService
 
 from users.services.user_services import UserService
 
-from .tasks import calc_sum
-
 
 class CreateChallengeView(APIView):
     """View for creating challenge."""
