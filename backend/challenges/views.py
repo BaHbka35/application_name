@@ -17,6 +17,8 @@ from .services.challenge_member_services import ChallengeMemberService
 
 from users.services.user_services import UserService
 
+from .tasks import calc_sum
+
 
 class CreateChallengeView(APIView):
     """View for creating challenge."""
@@ -122,6 +124,7 @@ class GetChallengesListView(APIView):
         queryset = Challenge.objects.all().filter(is_active=True)
         serializer = GetChallengesListSerializer(queryset, many=True)
         challenges_list = json.loads(json.dumps(serializer.data))
+
         return Response(data=challenges_list, status=status.HTTP_200_OK)
 
 

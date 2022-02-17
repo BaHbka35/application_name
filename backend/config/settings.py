@@ -144,6 +144,8 @@ VIDEO_EXAMPLES_DIR = 'video_examples/'
 CHALLENGE_ANSWERS_DIR = 'challenge_answers/'
 
 
+BROKER_URL = os.getenv('BROKER_URL')
+BACKEND_URL = os.getenv('BACKEND_URL')
 
 
 
