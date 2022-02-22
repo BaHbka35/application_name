@@ -2,6 +2,7 @@ from typing import Optional
 import json
 
 from django.contrib.auth import authenticate
+from django.contrib.sites.shortcuts import get_current_site
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -20,6 +21,8 @@ from .services.user_services import UserService
 from .services.token_signature_services import TokenSignatureService
 from .services.datetime_services import DatetimeService
 
+from .tasks import send_email_for_activate_account, send_email_for_confirm_changing_email
+
 
 class SignUpView(APIView):
     """View for registration user."""
@@ -32,7 +35,9 @@ class SignUpView(APIView):
         serializer.is_valid(raise_exception=True)
         user = User.objects.create_user(**serializer.data)
         UserBalance(user=user).save()
-        EmailService.send_email_for_activate_account(request, user)
+
+        current_site_domain = get_current_site(request).domain
+        send_email_for_activate_account.delay(current_site_domain, user.id)
 
         data = serializer.data
         data["message"] = "Check your email for activate account."
@@ -174,8 +179,10 @@ class UserChangeEmailView(APIView):
         user = request.user
         new_user_email = serializer.data['new_user_email']
         EmailService.add_email_to_not_confirmed(user, new_user_email)
-        EmailService.send_email_for_confirm_changing_email(
-            request, user, new_user_email)
+
+        current_site_domain = get_current_site(request).domain
+        send_email_for_confirm_changing_email.delay(current_site_domain, user.id,
+                                                    new_user_email)
         return Response(status=status.HTTP_200_OK)
 
 

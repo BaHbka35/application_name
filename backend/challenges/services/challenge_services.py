@@ -69,6 +69,13 @@ class ChallengeService:
         except Challenge.DoesNotExist:
             return None
 
+    @staticmethod
+    def make_challenges_not_active(challenge: Challenge) -> None:
+        """"""
+        challenge.is_active = False
+        challenge.save()
+
+
 
 
 

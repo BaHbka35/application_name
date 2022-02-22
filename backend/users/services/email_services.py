@@ -1,5 +1,4 @@
 from django.core.mail import EmailMessage
-from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 
 from users.models import User, NotConfirmedEmail
@@ -11,11 +10,11 @@ class EmailService:
     """Class witch contain logic for email sending."""
 
     @classmethod
-    def send_email_for_activate_account(cls, request, user: User) -> None:
+    def send_email_for_activate_account(cls, current_site_domain, user: User) -> None:
         """Send email to user email with activation link."""
         encrypted_datetime = DatetimeService.get_encrypted_datetime()
         token = TokenService.get_activation_token(user, encrypted_datetime)
-        content = cls.__get_content_for_email(request, user, token,
+        content = cls.__get_content_for_email(current_site_domain, user, token,
                                               encrypted_datetime)
         ready_email = cls.__get_ready_activation_email(content, user)
         ready_email.send()
@@ -33,7 +32,7 @@ class EmailService:
 
     @classmethod
     def send_email_for_confirm_changing_email(
-            cls, request, user: User, new_user_email: str) -> None:
+            cls, current_site_domain, user: User, new_user_email: str) -> None:
         """
         Send email to new user email address
         for further confirmation his email
@@ -41,7 +40,7 @@ class EmailService:
         encrypted_datetime = DatetimeService.get_encrypted_datetime()
         token = TokenService.get_email_confirmation_token(user, encrypted_datetime,
                                                           new_user_email)
-        content = cls.__get_content_for_email(request, user,
+        content = cls.__get_content_for_email(current_site_domain, user,
                                               token, encrypted_datetime)
         ready_email = cls.__get_ready_email_for_confirm_changing(
             content, new_user_email)
@@ -60,16 +59,15 @@ class EmailService:
         return email
 
     @classmethod
-    def __get_content_for_email(cls, request, user: User, token: str,
+    def __get_content_for_email(cls, current_site_domain, user: User, token: str,
                                 encrypted_datetime: str) -> tuple:
         """Forms content for email latter."""
-        current_site = get_current_site(request)
         content = {
             'user': user,
             'id': user.id,
             'encrypted_datetime': encrypted_datetime,
             'token': token,
-            'domain': current_site.domain
+            'domain': current_site_domain
         }
         return content
 

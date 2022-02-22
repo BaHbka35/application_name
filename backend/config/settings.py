@@ -139,13 +139,16 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 MEDIA_URL = '/media/'
 
 
-
 VIDEO_EXAMPLES_DIR = 'video_examples/'
 CHALLENGE_ANSWERS_DIR = 'challenge_answers/'
 
 
-BROKER_URL = os.getenv('BROKER_URL')
-BACKEND_URL = os.getenv('BACKEND_URL')
+REDIS_HOST = os.getenv('REDIS_HOST')
+REDIS_PORT = os.getenv('REDIS_PORT')
+
+
+CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/0'
+CELERY_RESULT_BACKEND = f'redis://{REDIS_HOST}:{REDIS_PORT}/1'
 
 
 
