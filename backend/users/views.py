@@ -2,7 +2,6 @@ from typing import Optional
 import json
 
 from django.contrib.auth import authenticate
-from django.contrib.sites.shortcuts import get_current_site
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -20,8 +19,10 @@ from .services.token_services import TokenService
 from .services.user_services import UserService
 from .services.token_signature_services import TokenSignatureService
 from .services.datetime_services import DatetimeService
+from .services import services
 
-from .tasks import send_email_for_activate_account, send_email_for_confirm_changing_email
+from .tasks import send_email_for_activate_account,\
+                   send_email_for_confirm_changing_email
 
 
 class SignUpView(APIView):
@@ -33,15 +34,11 @@ class SignUpView(APIView):
         """
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = User.objects.create_user(**serializer.data)
-        UserBalance(user=user).save()
-
-        current_site_domain = get_current_site(request).domain
-        send_email_for_activate_account.delay(current_site_domain, user.id)
-
-        data = serializer.data
-        data["message"] = "Check your email for activate account."
-        del data['password']
+        user = UserService.create_user_and_his_balance(serializer.data)
+        send_email_for_activate_account.delay(
+            services.get_current_site_domain(request), user.id)
+        data = services.get_amended_data_for_response_from_signup_view(
+            serializer.data)
         return Response(data=data, status=status.HTTP_201_CREATED)
 
 
@@ -56,13 +53,10 @@ class AccountActivationView(APIView):
             data = {'message': 'Activation account is failed.'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
-        decrypted_datetime = DatetimeService.get_decrypted_datetime(encrypted_datetime)
-        if not TokenService.check_token_lifetime(decrypted_datetime):
-            data = {'message': 'Lifetime of token is finished.'}
+        result, data = TokenService.is_activation_token_valid(
+            user, encrypted_datetime, token)
+        if not result:
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-
-        if not TokenService.check_activation_token(user, encrypted_datetime, token):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
 
         UserService.activate_user(user)
         data = {'message': 'User was successfully activated.'}
@@ -86,12 +80,10 @@ class LogInView(APIView):
                             password=serializer.data['password'])
         if not user:
             data = {'message': 'Username or password incorrect.'}
-            return Response(data=data,
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
         if not user.is_activated:
             data = {'message': 'User is not activated'}
-            return Response(data=data,
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
         token = TokenService.get_user_auth_token(user)
         signature = TokenSignatureService.get_signature(token)
         data = {'token': token, 'signature': signature}
@@ -107,7 +99,8 @@ class LogOutView(APIView):
         """Logs user out."""
         user = request.user
         TokenService.delete_user_auth_token(user)
-        return Response(status.HTTP_200_OK)
+        data = {'message': 'User was successfully logout'}
+        return Response(data=data, status=status.HTTP_200_OK)
 
 
 class ChangePasswordView(APIView):
@@ -123,7 +116,8 @@ class ChangePasswordView(APIView):
         UserService.change_user_password(
             user, serializer.data['new_password'])
         TokenService.delete_user_auth_token(user)
-        return Response(status=status.HTTP_200_OK)
+        data = {'message': 'User password was changed successfully.'}
+        return Response(data=data, status=status.HTTP_200_OK)
 
 
 class DeleteUserAccountView(APIView):
@@ -134,7 +128,8 @@ class DeleteUserAccountView(APIView):
     def delete(self, request) -> Response:
         """Deletes user account."""
         request.user.delete()
-        return Response(status=status.HTTP_200_OK)
+        data = {'message': 'User was deleted successfully.'}
+        return Response(data=data, status=status.HTTP_200_OK)
 
 
 class UpdateUserDataView(APIView):
@@ -143,7 +138,7 @@ class UpdateUserDataView(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request):
-        """Update user data."""
+        """Updates user data."""
         serializer = UpdateUserDateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = request.user
@@ -158,8 +153,8 @@ class UsersListView(APIView):
 
     def get(self, request) -> Response:
         """Returns list of users."""
-        queryset = User.objects.all()
-        serializer = UsersListSerializer(queryset, many=True)
+        users_queryset = User.objects.all()
+        serializer = UsersListSerializer(users_queryset, many=True)
         users_list = json.loads(json.dumps(serializer.data))
         return Response(data=users_list, status=status.HTTP_200_OK)
 
@@ -179,10 +174,8 @@ class UserChangeEmailView(APIView):
         user = request.user
         new_user_email = serializer.data['new_user_email']
         EmailService.add_email_to_not_confirmed(user, new_user_email)
-
-        current_site_domain = get_current_site(request).domain
-        send_email_for_confirm_changing_email.delay(current_site_domain, user.id,
-                                                    new_user_email)
+        send_email_for_confirm_changing_email.delay(
+            services.get_current_site_domain(request), user.id, new_user_email)
         return Response(status=status.HTTP_200_OK)
 
 
@@ -195,14 +188,10 @@ class EmailConfirmationView(APIView):
         not_confirmed_email = NotConfirmedEmail.objects.get(user=user)
         new_user_email = not_confirmed_email.email
 
-        decrypted_datetime = DatetimeService.get_decrypted_datetime(encrypted_datetime)
-        if not TokenService.check_token_lifetime(decrypted_datetime):
-            data = {'message': 'Lifetime of token is finished.'}
+        result, data = TokenService.is_email_confirmation_token_valid(
+            user, encrypted_datetime, token,  new_user_email)
+        if not result:
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-
-        if not TokenService.is_email_confirmation_token_belongs_to_current_user(
-                user, encrypted_datetime, token,  new_user_email):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
 
         user.email = new_user_email
         user.save()
