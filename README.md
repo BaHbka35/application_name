@@ -26,6 +26,10 @@ DJANGO_SUPERUSER_SURNAME=admin
 DJANGO_SUPERUSER_USERNAME=admin
 DJANGO_SUPERUSER_EMAIL=admin@gmail.com
 DJANGO_SUPERUSER_PASSWORD=1
+
+# Redis settings
+REDIS_HOST=redis
+REDIS_PORT=6379 
 ```
 
 !!! You should change some settings for yourself
