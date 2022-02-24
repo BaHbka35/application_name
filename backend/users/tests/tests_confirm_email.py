@@ -4,8 +4,8 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from users.models import User, NotConfirmedEmail
-from users.services.token_services import TokenService
-from users.services.datetime_services import DatetimeService
+from users.services.token_services import TokenService, EmailConfirmationTokenService
+from users.services.datetime_services import DatetimeEncryptionService
 from services_for_tests.for_tests import registrate_and_activate_user, get_auth_headers,\
                                          set_auth_headers, ForTestsDateTimeService
 from services_for_tests.data_for_tests import signup_data, login_data
@@ -38,8 +38,8 @@ class EmailConfirmationTests(APITestCase):
         Checks that user email was changed and his new
         email address was deleted from temporary list.
         """
-        encrypted_datetime = DatetimeService.get_encrypted_datetime()
-        token = TokenService.get_email_confirmation_token(
+        encrypted_datetime = DatetimeEncryptionService.get_encrypted_datetime()
+        token = EmailConfirmationTokenService.get_email_confirmation_token(
             self.user, encrypted_datetime, self.new_user_email)
 
         kwargs = {
@@ -59,7 +59,7 @@ class EmailConfirmationTests(APITestCase):
     def test_confirm_user_email_with_overdue_token(self):
         """Tests confirm user email with overdue token."""
         encrypted_datetime = ForTestsDateTimeService.get_encrypted_datetime()
-        token = TokenService.get_email_confirmation_token(
+        token = EmailConfirmationTokenService.get_email_confirmation_token(
             self.user, encrypted_datetime, self.new_user_email)
 
         kwargs = {'id': self.user.id,
