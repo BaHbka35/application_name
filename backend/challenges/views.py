@@ -216,9 +216,16 @@ class GetChallengeAnswersView(APIView):
             data = {'message': 'You are not member of this challenge'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
-        challenge_answers = ChallengeAnswerService.get_challenge_answers(
-            challenge, challenge_member)
-        serializer = GetChallengeAnswersSerializer(challenge_answers, many=True)
+        if challenge.is_active:
+            challenge_answer_queryset = ChallengeAnswer.objects.filter(
+                challenge=challenge, challenge_member=challenge_member)
+            serializer = GetChallengeAnswersSerializer(
+                challenge_answer_queryset, many=True)
+        else:
+            all_challenge_answers_queryset = ChallengeAnswer.objects.filter(
+                challenge=challenge)
+            serializer = GetChallengeAnswersSerializer(
+                all_challenge_answers_queryset, many=True)
         data = json.loads(json.dumps(serializer.data))
         return Response(data=data, status=status.HTTP_200_OK)
 

@@ -36,31 +36,6 @@ class ChallengeAnswerService:
         challenge_answer.video_answer.name = file_name
         challenge_answer.save()
 
-    @classmethod
-    def get_challenge_answer_by_current_user(
-            cls, challenge: Challenge, challenge_member: ChallengeMember
-            ) -> Optional[ChallengeAnswer]:
-        """Returns challenge answer that belongs to current member."""
-        challenge_answer = ChallengeAnswer.objects.filter(
-            challenge=challenge, challenge_member=challenge_member)
-        if challenge_answer:
-            return challenge_answer
-        return None
-
-    @classmethod
-    def get_challenge_answers(cls, challenge: Challenge,
-                              challenge_member: ChallengeMember) -> Optional[QuerySet]:
-        """
-        If challenge is active returns only answer that belongs
-        to current member else return all answers of challenge
-        """
-        if challenge.is_active:
-            user_challenge_answer = cls.get_challenge_answer_by_current_user(
-                challenge=challenge, challenge_member=challenge_member)
-            return user_challenge_answer
-        all_challenge_answers = ChallengeAnswer.objects.filter(challenge=challenge)
-        return all_challenge_answers
-
 
 
 
