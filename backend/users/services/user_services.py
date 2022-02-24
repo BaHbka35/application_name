@@ -5,6 +5,13 @@ class UserService:
     """Class witch contain all logic belongs to user"""
 
     @staticmethod
+    def create_user_and_his_balance(data: dict) -> User:
+        """Creates user and create his balance."""
+        user = User.objects.create_user(**data)
+        UserBalance(user=user).save()
+        return user
+
+    @staticmethod
     def activate_user(user: User) -> User:
         """Activates user account."""
         user.is_activated = True

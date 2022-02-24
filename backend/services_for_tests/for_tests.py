@@ -6,8 +6,8 @@ from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from users.models import User, UserBalance
-from users.services.datetime_services import DatetimeService
-from users.services.token_services import TokenService
+from users.services.datetime_services import DatetimeEncryptionService
+from users.services.token_services import TokenService, AuthenticationTokenService
 from users.services.token_signature_services import TokenSignatureService
 
 from challenges.models import Challenge, ChallengeBalance, ChallengeMember, ChallengeAnswer
@@ -39,7 +39,7 @@ def registrate_and_activate_user(signup_data: dict) -> User:
 def get_auth_headers(login_data: dict) -> dict:
     """Returns dict with authentication headers."""
     user = User.objects.get(username=login_data['username'])
-    token = TokenService.get_user_auth_token(user)
+    token = AuthenticationTokenService.get_user_authentication_token(user)
     signature = TokenSignatureService.get_signature(token)
     data = {'token': token, 'signature': signature}
     return data
@@ -93,7 +93,7 @@ def add_answer_on_challenge(challenge_member: ChallengeMember, challenge: Challe
         challenge_member=challenge_member, challenge=challenge)
     return challenge_answer
 
-class ForTestsDateTimeService(DatetimeService):
+class ForTestsDateTimeService(DatetimeEncryptionService):
     """
     This class needs for overwrite function of parent class.
     This is need for tests. For tests with overdue token.
@@ -111,7 +111,7 @@ class ForTestsDateTimeService(DatetimeService):
         time_change = datetime.timedelta(hours=25)
         new_time = datetime_obj_now - time_change
 
-        datetime_str_now = new_time.strftime("%Y-%m-%d %H:%M:%S")
+        datetime_str_now = new_time.strftime(cls.datetime_format)
 
         forming_str = datetime_str_now.encode()
         encrypted_datetime = cls.fernet.encrypt(forming_str)
