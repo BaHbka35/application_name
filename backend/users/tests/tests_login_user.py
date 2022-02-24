@@ -4,7 +4,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from users.models import User
-from users.services.token_services import TokenService
+from users.services.token_services import AuthenticationTokenService
 from users.services.token_signature_services import TokenSignatureService
 
 from services_for_tests.for_tests import registrate_and_activate_user, registrate_user
@@ -24,7 +24,7 @@ class LogInAPITests(APITestCase):
         data = login_data.copy()
         response = self.client.post(self.url, data, format='json')
         user = User.objects.get()
-        token = TokenService.get_user_auth_token(user)
+        token = AuthenticationTokenService.get_user_authentication_token(user)
         signature = TokenSignatureService.get_signature(token)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)

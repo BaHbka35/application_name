@@ -2,18 +2,18 @@ from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 
 from users.models import User, NotConfirmedEmail
-from .token_services import TokenService
-from .datetime_services import DatetimeService
+from .token_services import ActivationTokenService, EmailConfirmationTokenService
+from .datetime_services import DatetimeEncryptionService
 
 
-class EmailService:
-    """Class witch contain logic for email sending."""
+class EmailSendingService:
+    """Class which contain logic that is connected with email sending."""
 
     @classmethod
     def send_email_for_activate_account(cls, current_site_domain, user: User) -> None:
         """Send email to user email with activation link."""
-        encrypted_datetime = DatetimeService.get_encrypted_datetime()
-        token = TokenService.get_activation_token(user, encrypted_datetime)
+        encrypted_datetime = DatetimeEncryptionService.get_encrypted_datetime()
+        token = ActivationTokenService.get_activation_token(user, encrypted_datetime)
         content = cls.__get_content_for_email(current_site_domain, user, token,
                                               encrypted_datetime)
         ready_email = cls.__get_ready_activation_email(content, user)
@@ -29,7 +29,6 @@ class EmailService:
         email = EmailMessage(subject, html_message, to=[user_email])
         return email
 
-
     @classmethod
     def send_email_for_confirm_changing_email(
             cls, current_site_domain, user: User, new_user_email: str) -> None:
@@ -37,9 +36,9 @@ class EmailService:
         Send email to new user email address
         for further confirmation his email
         """
-        encrypted_datetime = DatetimeService.get_encrypted_datetime()
-        token = TokenService.get_email_confirmation_token(user, encrypted_datetime,
-                                                          new_user_email)
+        encrypted_datetime = DatetimeEncryptionService.get_encrypted_datetime()
+        token = EmailConfirmationTokenService.get_email_confirmation_token(
+            user, encrypted_datetime, new_user_email)
         content = cls.__get_content_for_email(current_site_domain, user,
                                               token, encrypted_datetime)
         ready_email = cls.__get_ready_email_for_confirm_changing(
@@ -71,16 +70,20 @@ class EmailService:
         }
         return content
 
+
+class EmailAddressHandlingService:
+    """Service for different actions with email addresses."""
+
     @staticmethod
-    def add_email_to_not_confirmed(user: User, new_user_email: str) -> None:
+    def add_email_address_to_not_confirmed(user: User, new_user_email: str) -> None:
         """Add email to not confirmed emails list"""
         try:
-            obj = NotConfirmedEmail.objects.get(user=user)
+            not_confirmed_email = NotConfirmedEmail.objects.get(user=user)
         except NotConfirmedEmail.DoesNotExist:
-            obj = None
+            not_confirmed_email = None
 
-        if obj:
-            obj.delete()
+        if not_confirmed_email:
+            not_confirmed_email.delete()
         NotConfirmedEmail(user=user, email=new_user_email).save()
 
 

@@ -1,4 +1,3 @@
-from typing import Optional
 import json
 
 from django.contrib.auth import authenticate
@@ -12,13 +11,14 @@ from .serializers import SignUpSerializer, LogInSerializer, \
                          UsersListSerializer, ChangePasswordSerializer, \
                          UpdateUserDateSerializer, ChangeUserEmailSerializer
 
-from .models import User, NotConfirmedEmail, UserBalance
+from .models import User, NotConfirmedEmail
 
-from .services.email_services import EmailService
-from .services.token_services import TokenService
+from .services.email_services import EmailAddressHandlingService
+from .services.token_services import ActivationTokenService,\
+                                     AuthenticationTokenService,\
+                                     EmailConfirmationTokenService
 from .services.user_services import UserService
 from .services.token_signature_services import TokenSignatureService
-from .services.datetime_services import DatetimeService
 from .services import services
 
 from .tasks import send_email_for_activate_account,\
@@ -53,7 +53,7 @@ class AccountActivationView(APIView):
             data = {'message': 'Activation account is failed.'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
-        result, data = TokenService.is_activation_token_valid(
+        result, data = ActivationTokenService.is_activation_token_valid(
             user, encrypted_datetime, token)
         if not result:
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
@@ -84,7 +84,7 @@ class LogInView(APIView):
         if not user.is_activated:
             data = {'message': 'User is not activated'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-        token = TokenService.get_user_auth_token(user)
+        token = AuthenticationTokenService.get_user_authentication_token(user)
         signature = TokenSignatureService.get_signature(token)
         data = {'token': token, 'signature': signature}
         return Response(data=data, status=status.HTTP_200_OK)
@@ -98,7 +98,7 @@ class LogOutView(APIView):
     def get(self, request) -> Response:
         """Logs user out."""
         user = request.user
-        TokenService.delete_user_auth_token(user)
+        AuthenticationTokenService.delete_user_authentication_token(user)
         data = {'message': 'User was successfully logout'}
         return Response(data=data, status=status.HTTP_200_OK)
 
@@ -115,7 +115,7 @@ class ChangePasswordView(APIView):
         user = request.user
         UserService.change_user_password(
             user, serializer.data['new_password'])
-        TokenService.delete_user_auth_token(user)
+        AuthenticationTokenService.delete_user_authentication_token(user)
         data = {'message': 'User password was changed successfully.'}
         return Response(data=data, status=status.HTTP_200_OK)
 
@@ -173,7 +173,8 @@ class UserChangeEmailView(APIView):
         serializer.is_valid(raise_exception=True)
         user = request.user
         new_user_email = serializer.data['new_user_email']
-        EmailService.add_email_to_not_confirmed(user, new_user_email)
+        EmailAddressHandlingService.add_email_address_to_not_confirmed(
+            user, new_user_email)
         send_email_for_confirm_changing_email.delay(
             services.get_current_site_domain(request), user.id, new_user_email)
         return Response(status=status.HTTP_200_OK)
@@ -188,7 +189,7 @@ class EmailConfirmationView(APIView):
         not_confirmed_email = NotConfirmedEmail.objects.get(user=user)
         new_user_email = not_confirmed_email.email
 
-        result, data = TokenService.is_email_confirmation_token_valid(
+        result, data = EmailConfirmationTokenService.is_email_confirmation_token_valid(
             user, encrypted_datetime, token,  new_user_email)
         if not result:
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
