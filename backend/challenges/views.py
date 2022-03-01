@@ -176,7 +176,8 @@ class AddAnswerOnChallengeView(APIView):
             data = {'message': 'this challenge was finished.'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
-        challenge_member = ChallengeMemberService.get_challenge_member(user, challenge)
+        challenge_member = ChallengeMemberService.get_challenge_member(
+            user, challenge)
         if not challenge_member:
             data = {'message': 'You are not member of this challenge'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
@@ -188,8 +189,8 @@ class AddAnswerOnChallengeView(APIView):
         challenge_answer = ChallengeAnswerService.get_challenge_answer(
             challenge_member=challenge_member, challenge=challenge)
         video_answer_file = request.data['video_answer']
-        ChallengeAnswerService.update_video_answer(challenge_member, challenge_answer,
-                                                   video_answer_file)
+        ChallengeAnswerService.update_video_answer(
+            challenge_member, challenge_answer, video_answer_file)
         return Response(status=status.HTTP_200_OK)
 
 
@@ -215,12 +216,18 @@ class GetChallengeAnswersView(APIView):
             data = {'message': 'You are not member of this challenge'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
-        challenge_answers = ChallengeAnswerService.get_challenge_answers(
-            challenge, challenge_member)
-        serializer = GetChallengeAnswersSerializer(challenge_answers, many=True)
-        data_for_response = json.loads(json.dumps(serializer.data))
-
-        return Response(data=data_for_response, status=status.HTTP_200_OK)
+        if challenge.is_active:
+            challenge_answer_queryset = ChallengeAnswer.objects.filter(
+                challenge=challenge, challenge_member=challenge_member)
+            serializer = GetChallengeAnswersSerializer(
+                challenge_answer_queryset, many=True)
+        else:
+            all_challenge_answers_queryset = ChallengeAnswer.objects.filter(
+                challenge=challenge)
+            serializer = GetChallengeAnswersSerializer(
+                all_challenge_answers_queryset, many=True)
+        data = json.loads(json.dumps(serializer.data))
+        return Response(data=data, status=status.HTTP_200_OK)
 
 
 
