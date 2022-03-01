@@ -37,7 +37,8 @@ class ChallengeService:
         directory = 'video_examples'
         file_name = f'{user.id}_{challenge.id}.mp4'
         if challenge.video_example:
-            file_path = os.path.join(settings.MEDIA_ROOT, f'{directory}/{file_name}')
+            file_path = os.path.join(settings.MEDIA_ROOT,
+                                     f'{directory}/{file_name}')
             delete_existing_file(file_path)
 
         challenge.video_example = video_example_file
@@ -45,14 +46,16 @@ class ChallengeService:
         challenge.save()
 
     @staticmethod
-    def add_coins_for_challenge(challenge: Challenge, coins_amount: int) -> None:
+    def add_coins_for_challenge(challenge: Challenge, coins_amount: int
+                                ) -> None:
         """Add coins to challenge balance"""
         challenge.balance.coins_amount += coins_amount
         challenge.balance.save()
 
     @staticmethod
-    def withdraw_coins_from_challenge(challenge: Challenge, coins_amount: int) -> None:
-        """withdraw coins from challenge balance."""
+    def withdraw_coins_from_challenge(challenge: Challenge, coins_amount: int
+                                      ) -> None:
+        """Withdraw coins from challenge balance."""
         challenge.balance.coins_amount -= coins_amount
         challenge.balance.save()
 
@@ -71,7 +74,7 @@ class ChallengeService:
 
     @staticmethod
     def make_challenges_not_active(challenge: Challenge) -> None:
-        """"""
+        """Makes challenge not active."""
         challenge.is_active = False
         challenge.save()
 
