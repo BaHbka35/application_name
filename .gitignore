@@ -5,5 +5,6 @@
 backend/media/
 backend/.env
 backend/db
+backend/logs/
 **/__pycache__
 backend/celerybeat-schedule
