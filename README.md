@@ -1,3 +1,6 @@
+More information about project you can see on docs/concept.md
+
+
 1. Go to backend directory
 
 create .env and write into next.
